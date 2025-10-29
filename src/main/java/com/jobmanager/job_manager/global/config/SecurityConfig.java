@@ -13,17 +13,16 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        // 초기 개발 단계: 인증 없이 접근 허용
         http.csrf(csrf -> csrf.disable())
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
-                        // Swagger & health 허용
                         .requestMatchers(
+                                "/api/auth/**",      // ★ 회원가입/로그인 허용
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/healthz"
                         ).permitAll()
-                        .anyRequest().permitAll()
+                        .anyRequest().permitAll()   // 초기 개발 단계 그대로
                 );
         return http.build();
     }

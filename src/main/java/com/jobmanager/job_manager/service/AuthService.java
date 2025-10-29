@@ -7,8 +7,11 @@ import com.jobmanager.job_manager.global.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional; // ★ 추가
+import java.time.LocalDateTime;
 
-@Service @RequiredArgsConstructor
+@Service
+@RequiredArgsConstructor
 public class AuthService {
 
     private final AccountRepository accountRepo;
@@ -18,11 +21,20 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwt;
 
+    @Transactional // ★ 한 트랜잭션으로 처리
     public void register(RegisterRequest req) {
+        // username 중복 방지
         accountRepo.findByUsername(req.getUsername()).ifPresent(a -> {
             throw new IllegalArgumentException("이미 존재하는 username");
         });
+        // (선택) email 중복 방지
+        if (req.getEmail() != null && !req.getEmail().isBlank()) {
+            accountRepo.findByEmail(req.getEmail()).ifPresent(a -> {
+                throw new IllegalArgumentException("이미 존재하는 email");
+            });
+        }
 
+        // 1) accounts insert
         Account acc = Account.builder()
                 .accountType(Account.AccountType.USER)
                 .username(req.getUsername())
@@ -30,22 +42,27 @@ public class AuthService {
                 .phone(req.getPhone())
                 .status(Account.Status.ACTIVE)
                 .build();
+        acc = accountRepo.save(acc); // managed
 
-        // 1 계정 먼저 저장 (managed 상태로 만듦)
-        acc = accountRepo.save(acc);
-
-        // 2️ Credential 생성 시, 저장된 account 엔티티를 그대로 연결
+        // 2) credentials insert (암호화 저장)
         Credential cred = Credential.builder()
-                .account(acc)                  // managed 상태의 Account
-                .accountId(acc.getId())        // ★ 명시적으로 ID 지정
+                .account(acc) // ★ @MapsId가 account.id를 복사 -> accountId 수동세팅 X
                 .passwordHash(passwordEncoder.encode(req.getPassword()))
+                .passwordUpdatedAt(LocalDateTime.now())
                 .mfaEnabled(false)
                 .build();
-
-        // 3️ Credential 저장
         credRepo.save(cred);
-    }
 
+        // (선택) 기본 권한 부여 — roles 테이블에 ROLE_USER가 있다고 가정
+        Account finalAcc = acc;
+        roleRepo.findByCode("ROLE_USER").ifPresent(role ->
+                arRepo.save(AccountRole.builder()
+                        .accountId(finalAcc.getId())
+                        .roleId(role.getId())
+                        .grantedAt(LocalDateTime.now())
+                        .build())
+        );
+    }
 
     public String login(String id, String rawPassword) {
         // id는 username 우선, 없으면 email
@@ -60,10 +77,8 @@ public class AuthService {
             throw new IllegalArgumentException("비밀번호 불일치");
         }
 
-        // 가장 기본 역할 하나만 JWT에 담아 발급 (필요 시 조회 확장)
+        // 가장 기본 역할만 토큰에 포함 (필요 시 확장)
         String role = "ROLE_USER";
-        // 관리자/회사 권한 부여는 account_roles 조합으로 확장 가능
-
         return jwt.generate(acc.getUsername(), role);
     }
 }
