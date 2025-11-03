@@ -21,7 +21,6 @@ management:
 # === 토스/결제 공통 설정 ===
 toss:
   base-url: https://api.tosspayments.com/v1           # 결제승인/취소 엔드포인트 베이스
-  client-key: ${TOSS_CLIENT_KEY:}                     # 프론트로 내려줄 공개키 (환경변수/시크릿)
   secret-key: ${TOSS_SECRET_KEY:}                     # 서버 전용 시크릿키 (절대 프론트 노출 금지)
 
 payments:
