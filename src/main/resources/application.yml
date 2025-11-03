@@ -7,6 +7,27 @@ spring:
   profiles:
     active: dev
 
+# --- 공통 로깅/관리 설정 ---
+logging:
+  level:
+    org.hibernate.SQL: info
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+# === 토스/결제 공통 설정 ===
+toss:
+  base-url: https://api.tosspayments.com/v1           # 결제승인/취소 엔드포인트 베이스
+  client-key: ${TOSS_CLIENT_KEY:}                     # 프론트로 내려줄 공개키 (환경변수/시크릿)
+  secret-key: ${TOSS_SECRET_KEY:}                     # 서버 전용 시크릿키 (절대 프론트 노출 금지)
+
+payments:
+  success-url: ${PAY_SUCCESS_URL:https://localhost:5173/pay/success}  # 프론트 success 라우트
+  fail-url: ${PAY_FAIL_URL:https://localhost:5173/pay/fail}           # 프론트 fail 라우트
+
 ---
 spring:
   config:
@@ -20,18 +41,8 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: none        # 이미 테이블 있음 → none (필요시 validate)
+      ddl-auto: none          # 이미 테이블 존재 → none (필요하면 validate)
     open-in-view: false
     properties:
       hibernate.format_sql: true
       hibernate.dialect: org.hibernate.dialect.MySQLDialect
-
-logging:
-  level:
-    org.hibernate.SQL: info
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info

@@ -20,7 +20,8 @@ public class SecurityConfig {
                                 "/api/auth/**",      // ★ 회원가입/로그인 허용
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
-                                "/healthz"
+                                "/healthz",
+                                "/webhook/toss/**"
                         ).permitAll()
                         .anyRequest().permitAll()   // 초기 개발 단계 그대로
                 );
