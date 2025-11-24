@@ -45,3 +45,7 @@ spring:
     properties:
       hibernate.format_sql: true
       hibernate.dialect: org.hibernate.dialect.MySQLDialect
+
+jwt:
+  secret: "12345678901234567890123456789012"
+  expiration-ms: 3600000   # 1시간 (밀리초)

@@ -1,23 +1,56 @@
 package com.jobmanager.job_manager.global.jwt;
 
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import java.security.Key;
 import java.util.Date;
 
 @Component
 public class JwtTokenProvider {
-    private static final String SECRET = "jobmanager_super_secret_key_please_change_!!!";
-    private static final long EXP_MS = 1000L * 60 * 60 * 24; // 1일
 
-    public String generate(String subject, String role) {
+    private final Key key;
+    private final long expirationMs;
+
+    public JwtTokenProvider(
+            @Value("${jwt.secret}") String secretKey,
+            @Value("${jwt.expiration-ms}") long expirationMs
+    ) {
+        this.key = Keys.hmacShaKeyFor(secretKey.getBytes());
+        this.expirationMs = expirationMs;
+    }
+
+    // JWT 생성
+    public String generate(Long accountId,
+                           String username,
+                           String accountType,
+                           String roleCode) {
+
         Date now = new Date();
+        Date expiry = new Date(now.getTime() + expirationMs);
+
         return Jwts.builder()
-                .setSubject(subject)              // username or email
-                .claim("role", role)
+                .setSubject(String.valueOf(accountId))
+                .claim("username", username)
+                .claim("type", accountType)
+                .claim("role", roleCode)
                 .setIssuedAt(now)
-                .setExpiration(new Date(now.getTime() + EXP_MS))
-                .signWith(Keys.hmacShaKeyFor(SECRET.getBytes()), SignatureAlgorithm.HS256)
+                .setExpiration(expiry)
+                .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
+
+    // 기존 필터가 쓰는 parse() 메서드 추가
+    public Claims parse(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+    }
+
 }
