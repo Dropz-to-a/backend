@@ -33,6 +33,9 @@ public class UserLeave {
     @Column(name = "leave_type", length = 50)
     private String leaveType;
 
+    @Column(name = "leave_unit", length = 20, nullable = false)
+    private String leaveUnit;  // FULL / HALF_AM / HALF_PM
+
     @Lob
     private String reason;
 
