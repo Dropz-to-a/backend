@@ -22,8 +22,22 @@ public class AttendanceController {
 
     private final AttendanceService attendanceService;
 
-    /** 회사가 직원 출근 찍기 */
-    @Operation(summary = "출근 기록 생성", description = "회사 계정이 특정 직원의 출근을 기록합니다.")
+    /**
+     * 회사가 직원 출근 찍기
+     */
+    @Operation(
+            summary = "출근 기록 생성",
+            description =
+                    "회사 계정이 특정 직원의 출근을 기록합니다.\n\n" +
+                            "📌 Request Body 설명\n" +
+                            "- employeeAccountId : 출근할 직원의 account_id (예: 1)\n" +
+                            "- companyAccountId  : 직원이 소속된 회사의 account_id (예: 8)\n\n" +
+                            "예시 JSON\n" +
+                            "{\n" +
+                            "  \"employeeAccountId\": 1,\n" +
+                            "  \"companyAccountId\": 8\n" +
+                            "}"
+    )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "출근 기록 성공",
                     content = @Content(schema = @Schema(implementation = AttendanceRecordResponse.class))),
@@ -35,8 +49,22 @@ public class AttendanceController {
         return AttendanceRecordResponse.from(result);
     }
 
-    /** 회사가 직원 퇴근 찍기 */
-    @Operation(summary = "퇴근 기록 생성", description = "회사 계정이 특정 직원의 퇴근을 기록합니다.")
+    /**
+     * 회사가 직원 퇴근 찍기
+     */
+    @Operation(
+            summary = "퇴근 기록 생성",
+            description =
+                    "회사 계정이 특정 직원의 퇴근을 기록합니다.\n\n" +
+                            "📌 Request Body 설명\n" +
+                            "- employeeAccountId : 퇴근 처리할 직원의 account_id (예: 1)\n" +
+                            "- companyAccountId  : 직원이 소속된 회사의 account_id (예: 8)\n\n" +
+                            "예시 JSON\n" +
+                            "{\n" +
+                            "  \"employeeAccountId\": 1,\n" +
+                            "  \"companyAccountId\": 8\n" +
+                            "}"
+    )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "퇴근 기록 성공",
                     content = @Content(schema = @Schema(implementation = AttendanceRecordResponse.class))),
