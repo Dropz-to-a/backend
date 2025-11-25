@@ -3,8 +3,8 @@ package com.jobmanager.job_manager.controller;
 import com.jobmanager.job_manager.entity.Company;
 import com.jobmanager.job_manager.dto.company.EmployeeStatusResponse;
 import com.jobmanager.job_manager.global.jwt.JwtHeaderUtils;
-import com.jobmanager.job_manager.service.CompanyService;
 import com.jobmanager.job_manager.global.jwt.JwtTokenProvider;
+import com.jobmanager.job_manager.service.CompanyService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -23,10 +23,9 @@ public class CompanyController {
 
     /** JWT에서 현재 로그인한 회사 ID 추출 */
     private long currentCompanyId() {
-        String token = JwtHeaderUtils.getTokenFromHeader(); // util로 분리
-        return jwt.getAccountId(token);
+        String token = JwtHeaderUtils.getTokenFromHeader(); // Authorization 헤더에서 Bearer 토큰 추출
+        return jwt.getAccountId(token);                     // ★ 토큰을 넘겨서 accountId 얻기
     }
-
 
     @GetMapping("/me")
     @Operation(summary = "내 회사 정보 조회")

@@ -16,4 +16,6 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
 
     /** 소속 여부 체크용 */
     boolean existsByCompanyIdAndEmployeeId(Long companyId, Long employeeId);
+
+    void deleteByCompanyIdAndEmployeeId(Long companyId, Long employeeId);
 }

@@ -24,7 +24,7 @@ public class JwtTokenProvider {
         this.expirationMs = expirationMs;
     }
 
-    // JWT 생성
+    /** JWT 생성 */
     public String generate(Long accountId,
                            String username,
                            String accountType,
@@ -44,7 +44,7 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    // 기존 필터가 쓰는 parse() 메서드 추가
+    /** JWT 파싱 (필터에서 사용) */
     public Claims parse(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(key)
@@ -53,11 +53,8 @@ public class JwtTokenProvider {
                 .getBody();
     }
 
-    // JWT 안에서 accountId 추출
+    /** 토큰에서 accountId 가져오기 */
     public Long getAccountId(String token) {
-        Claims claims = parse(token);
-        return Long.valueOf(claims.getSubject());
+        return Long.valueOf(parse(token).getSubject());
     }
-
-
 }
