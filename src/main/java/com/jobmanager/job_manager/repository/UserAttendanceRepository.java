@@ -14,4 +14,6 @@ public interface UserAttendanceRepository extends JpaRepository<UserAttendance, 
             Long companyId,
             LocalDate workDate
     );
+
+    boolean existsByAccountIdAndWorkDate(Long empId, LocalDate today);
 }
