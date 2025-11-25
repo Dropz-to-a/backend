@@ -53,4 +53,11 @@ public class JwtTokenProvider {
                 .getBody();
     }
 
+    // JWT 안에서 accountId 추출
+    public Long getAccountId(String token) {
+        Claims claims = parse(token);
+        return Long.valueOf(claims.getSubject());
+    }
+
+
 }
