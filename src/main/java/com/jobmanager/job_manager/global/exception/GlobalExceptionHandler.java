@@ -1,48 +1,45 @@
 package com.jobmanager.job_manager.global.exception;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import io.swagger.v3.oas.annotations.Hidden;
 
-import java.util.HashMap;
-import java.util.Map;
-
+@Hidden
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    /** IllegalArgumentException → 400 Bad Request */
+    /** Swagger와 완전 호환되는 에러 응답 DTO */
+    public record ErrorResponse(
+            int status,
+            String error,
+            String message,
+            String path
+    ) {}
+
+    /** 잘못된 요청 */
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<?> handleIllegalArgument(IllegalArgumentException e) {
-        return error(HttpStatus.BAD_REQUEST, e.getMessage());
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleIllegalArgument(IllegalArgumentException e, HttpServletRequest req){
+        return new ErrorResponse(
+                400,
+                "Bad Request",
+                e.getMessage(),
+                req.getRequestURI()
+        );
     }
 
-    /** IllegalStateException → 400 Bad Request */
-    @ExceptionHandler(IllegalStateException.class)
-    public ResponseEntity<?> handleIllegalState(IllegalStateException e) {
-        return error(HttpStatus.BAD_REQUEST, e.getMessage());
-    }
-
-    /** @Valid 실패 → 400 */
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<?> handleValidation(MethodArgumentNotValidException e) {
-        String message = e.getBindingResult()
-                .getAllErrors().get(0).getDefaultMessage();
-        return error(HttpStatus.BAD_REQUEST, message);
-    }
-
-    /** 기타 모든 예외 → 500 */
+    /** 서버 내부 오류 */
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<?> handleException(Exception e) {
-        return error(HttpStatus.INTERNAL_SERVER_ERROR, "서버 오류: " + e.getMessage());
-    }
-
-    private ResponseEntity<?> error(HttpStatus status, String message) {
-        Map<String, Object> body = new HashMap<>();
-        body.put("success", false);
-        body.put("status", status.value());
-        body.put("message", message);
-        return ResponseEntity.status(status).body(body);
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleException(Exception e, HttpServletRequest req){
+        return new ErrorResponse(
+                500,
+                "Internal Server Error",
+                e.getMessage(),
+                req.getRequestURI()
+        );
     }
 }
