@@ -1,3 +1,4 @@
+// src/main/java/com/jobmanager/job_manager/repository/CompanyRepository.java
 package com.jobmanager.job_manager.repository;
 
 import com.jobmanager.job_manager.entity.Company;
