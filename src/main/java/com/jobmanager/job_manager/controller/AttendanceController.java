@@ -13,7 +13,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @Tag(
         name = "Attendance",
@@ -151,5 +155,64 @@ public class AttendanceController {
     public AttendanceRecordResponse clockOut(@RequestBody @Valid AttendanceRecordRequest req) {
         UserAttendance result = attendanceService.clockOut(req);
         return AttendanceRecordResponse.from(result);
+    }
+
+    /**
+     * 근태 기록 조회 (회사 기준 / 직원 옵션 / 기간 조회)
+     */
+    @Operation(
+            summary = "근태 기록 조회",
+            description = """
+                회사 기준 출근/퇴근 기록을 조회합니다.
+                
+                파라미터:
+                - companyId: 회사 계정 ID (필수)
+                - employeeId: 특정 직원 ID (선택)
+                - fromDate, toDate: 조회 기간 (yyyy-MM-dd)
+                
+                employeeId 를 입력하지 않으면 회사 전체 직원 기록을 조회합니다.
+                """
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "조회 성공",
+            content = @Content(
+                    mediaType = "application/json",
+                    examples = @ExampleObject("""
+                    [
+                      {
+                        "attendanceId": 1001,
+                        "employeeAccountId": 1,
+                        "companyAccountId": 8,
+                        "checkType": "IN",
+                        "checkedAt": "2025-11-26T09:01:23",
+                        "status": "SUCCESS"
+                      },
+                      {
+                        "attendanceId": 1002,
+                        "employeeAccountId": 1,
+                        "companyAccountId": 8,
+                        "checkType": "OUT",
+                        "checkedAt": "2025-11-26T18:02:10",
+                        "status": "SUCCESS"
+                      }
+                    ]
+                    """)
+            )
+    )
+    @GetMapping("/history")
+    public List<AttendanceRecordResponse> getHistory(
+            @RequestParam Long companyId,
+            @RequestParam(required = false) Long employeeId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate
+    ) {
+        List<UserAttendance> list = attendanceService.getHistory(
+                companyId, employeeId, fromDate, toDate
+        );
+
+        return list.stream()
+                .map(AttendanceRecordResponse::from)
+                .toList();
     }
 }
