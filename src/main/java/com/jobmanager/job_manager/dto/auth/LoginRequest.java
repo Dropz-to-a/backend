@@ -1,9 +1,11 @@
 package com.jobmanager.job_manager.dto.auth;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 public class LoginRequest {
     private String id;        // username 또는 email
-    private String password;
+    private String password;  // 원문 비밀번호
 }

@@ -16,4 +16,6 @@ public interface UserAttendanceRepository extends JpaRepository<UserAttendance, 
     );
 
     boolean existsByAccountIdAndWorkDate(Long empId, LocalDate today);
+
+
 }

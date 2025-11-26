@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -58,6 +59,28 @@ public class AttendanceService {
         att.setStatus("DONE");
 
         return attendanceRepository.save(att);
+    }
+
+    /** ⭐ 근태 기록 조회 기능 추가 */
+    @Transactional(readOnly = true)
+    public List<UserAttendance> getHistory(
+            Long companyId,
+            Long employeeId,
+            LocalDate fromDate,
+            LocalDate toDate
+    ) {
+
+        if (employeeId == null) {
+            // 회사 전체 직원
+            return attendanceRepository.findByCompanyIdAndWorkDateBetween(
+                    companyId, fromDate, toDate
+            );
+        }
+
+        // 특정 직원만
+        return attendanceRepository.findByCompanyIdAndAccountIdAndWorkDateBetween(
+                companyId, employeeId, fromDate, toDate
+        );
     }
 
     /** 소속 확인 공통 로직 */
