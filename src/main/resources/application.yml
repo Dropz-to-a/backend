@@ -29,14 +29,10 @@ payments:
 
 ---
 spring:
-  config:
-    activate:
-      on-profile: dev
   datasource:
-    url: jdbc:mysql://localhost:3330/job_manager?serverTimezone=Asia/Seoul&useSSL=false&allowPublicKeyRetrieval=true
-    username: root
-    password: 1234
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://mysql-1bd69c46-capstone2.g.aivencloud.com:25590/defaultdb?ssl-mode=REQUIRED
+    username: avnadmin
+    password: AVNS_Ozi4pud2pUgpPbOzJ9V
 
   jpa:
     hibernate:
@@ -44,6 +40,7 @@ spring:
     open-in-view: false
     properties:
       hibernate.format_sql: true
+      show_sql: true
       hibernate.dialect: org.hibernate.dialect.MySQLDialect
 
 jwt:
