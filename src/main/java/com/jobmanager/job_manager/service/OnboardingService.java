@@ -58,6 +58,9 @@ public class OnboardingService {
         form.setBirth(birth);
         form.setAddress(req.getAddress());
 
+        System.out.println("DEBUG >>> accountId from JWT = " + accountId);
+        System.out.println("DEBUG >>> AccountType from DB = " + account.getAccountType());
+
         userFormRepository.save(form);
 
         return UserOnboardingResponse.from(form);

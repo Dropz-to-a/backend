@@ -34,7 +34,11 @@ public class SwaggerConfig {
             openApi.setServers(
                     java.util.Collections.singletonList(
                             new io.swagger.v3.oas.models.servers.Server()
+<<<<<<< Updated upstream
                                     .url("/")
+=======
+                                    .url("/")    // 중요: "현재 접속한 서버" 기준으로 URL 설정
+>>>>>>> Stashed changes
                     )
             );
         };

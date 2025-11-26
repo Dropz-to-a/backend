@@ -48,9 +48,10 @@ public class OnboardingController {
         SimpleUserPrincipal principal = (SimpleUserPrincipal) authentication.getPrincipal();
 
         Long accountId = principal.getAccountId();
-        String type = principal.getAccountType(); // USER / COMPANY / ADMIN
 
-        if (!"USER".equals(type)) {
+        String role = principal.getRole();
+
+        if (!"ROLE_USER".equals(role)) {
             throw new IllegalArgumentException("USER 계정만 유저 온보딩을 사용할 수 있습니다.");
         }
 
