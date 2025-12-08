@@ -39,10 +39,15 @@ public class UserForm {
     @Column(name = "birth")
     private LocalDate birth;      // 생년월일
 
+    @Column(name = "zonecode")
+    private String zonecode;      //우편번호
+
     @Column(name = "address")
     private String address;       // 거주지 주소
 
-    // 나머지 컬럼들(DB에는 있지만, 지금은 사용 안 해도 됨)
+    @Column(name = "detail_address")
+    private String detailaddress; //상세 주소
+
     @Column(name = "email")
     private String email;
 

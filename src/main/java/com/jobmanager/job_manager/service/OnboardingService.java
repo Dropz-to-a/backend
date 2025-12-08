@@ -28,11 +28,6 @@ public class OnboardingService {
     private final UserFormRepository userFormRepository;
     private final CompanyRepository companyRepository;
 
-    /**
-     * USER 온보딩
-     * - accountType 이 USER 인 계정만 허용
-     * - 이미 user_form 이 있으면 업데이트, 없으면 새로 생성
-     */
     public UserOnboardingResponse onboardUser(Long accountId, UserOnboardingRequest req) {
 
         Account account = accountRepository.findById(accountId)
@@ -57,9 +52,8 @@ public class OnboardingService {
         form.setName(req.getRealName());
         form.setBirth(birth);
         form.setAddress(req.getAddress());
-
-        System.out.println("DEBUG >>> accountId from JWT = " + accountId);
-        System.out.println("DEBUG >>> AccountType from DB = " + account.getAccountType());
+        form.setDetailaddress(req.getDetailAddress());
+        form.setZonecode(req.getZonecode());
 
         userFormRepository.save(form);
 

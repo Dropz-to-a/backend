@@ -27,58 +27,47 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-
                 .authorizeHttpRequests(auth -> auth
-                        // 1) Swagger 공개
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html"
                         ).permitAll()
-
-                        // 2) CORS Preflight OPTIONS 허용 (필수)
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-
-                        // 3) 인증 없이 허용하는 API
-                        .requestMatchers(HttpMethod.POST,
-                                "/api/auth/register",
-                                "/api/auth/login"
-                        ).permitAll()
-
-                        // 4) 그 외 모든 요청은 인증 필요
+                        .requestMatchers(HttpMethod.POST, "/api/auth/register", "/api/auth/login")
+                        .permitAll()
                         .anyRequest().authenticated()
                 )
-
-                // 5) JWT 필터는 UsernamePasswordAuthenticationFilter 전에 배치
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
-    // 비밀번호 인코더
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    // AuthenticationManager
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration)
+            throws Exception {
         return configuration.getAuthenticationManager();
     }
 
-    // CORS 설정
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.addAllowedOriginPattern("*");
-        config.addAllowedHeader("*");
         config.addAllowedMethod("*");
+        config.addAllowedHeader("*");
+
+        // 핵심: OPTIONS 명확하게 허용
+        config.addAllowedMethod("OPTIONS");
+
         config.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

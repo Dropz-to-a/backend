@@ -5,9 +5,6 @@ import com.jobmanager.job_manager.entity.UserForm;
 import lombok.Builder;
 import lombok.Getter;
 
-/**
- * 유저 온보딩 저장 결과 응답
- */
 @Getter
 @Builder
 public class UserOnboardingResponse {
@@ -16,6 +13,8 @@ public class UserOnboardingResponse {
     private String realName;
     private String birth;
     private String address;
+    private String detailAddress;
+    private String zonecode;
 
     public static UserOnboardingResponse from(UserForm form) {
         return UserOnboardingResponse.builder()
@@ -23,6 +22,8 @@ public class UserOnboardingResponse {
                 .realName(form.getName())
                 .birth(form.getBirth() != null ? form.getBirth().toString() : null)
                 .address(form.getAddress())
+                .detailAddress(form.getDetailaddress())
+                .zonecode(form.getZonecode())
                 .build();
     }
 }
