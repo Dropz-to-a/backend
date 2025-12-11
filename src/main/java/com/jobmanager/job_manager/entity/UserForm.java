@@ -7,12 +7,6 @@ import lombok.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-/**
- * user_form 테이블 매핑
- * - PK = account_id (accounts.id와 1:1)
- * - 온보딩에서는 name/birth/address만 채운다.
- *   나머지 컬럼은 나중에 프로필/추가 정보로 확장 가능.
- */
 @Entity
 @Table(name = "user_form")
 @Getter
@@ -26,27 +20,23 @@ public class UserForm {
     @Column(name = "account_id")
     private Long accountId;
 
-    // accounts.id 와 1:1 매핑
-    @MapsId
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "account_id")
-    private Account account;
+    // @MapsId 및 연관관계 제거 (필수)
+    // Hibernate merge 충돌을 유발하므로 삭제
 
-    // 온보딩에서 받는 값들
     @Column(name = "name", nullable = false)
-    private String name;          // 실명
+    private String name;
 
     @Column(name = "birth")
-    private LocalDate birth;      // 생년월일
+    private LocalDate birth;
 
-    @Column(name = "zonecode")
-    private String zonecode;      //우편번호
+    @Column(name = "zonecode", nullable = false)
+    private String zonecode;
 
     @Column(name = "address")
-    private String address;       // 거주지 주소
+    private String address;
 
-    @Column(name = "detail_address")
-    private String detailaddress; //상세 주소
+    @Column(name = "detail_address", nullable = false)
+    private String detailAddress;
 
     @Column(name = "email")
     private String email;
@@ -81,7 +71,7 @@ public class UserForm {
     @Column(name = "family", columnDefinition = "TEXT")
     private String family;
 
-    @Column(name = "hobby", columnDefinition = "TEXT")
+    @Column(name = "hobby")
     private String hobby;
 
     @Column(name = "motivation", columnDefinition = "TEXT")

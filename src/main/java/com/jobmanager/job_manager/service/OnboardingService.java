@@ -5,6 +5,8 @@ import com.jobmanager.job_manager.dto.onboarding.*;
 import com.jobmanager.job_manager.entity.Account;
 import com.jobmanager.job_manager.entity.Company;
 import com.jobmanager.job_manager.entity.UserForm;
+import com.jobmanager.job_manager.global.exception.errorcodes.OnboardingErrorCode;
+import com.jobmanager.job_manager.global.exception.exceptions.OnboardingException;
 import com.jobmanager.job_manager.repository.AccountRepository;
 import com.jobmanager.job_manager.repository.CompanyRepository;
 import com.jobmanager.job_manager.repository.UserFormRepository;
@@ -14,11 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 
-/**
- * 온보딩 비즈니스 로직
- * - USER 온보딩: 실명/생년월일/주소 저장
- * - COMPANY 온보딩: 회사 기본 정보 저장
- */
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -28,65 +25,77 @@ public class OnboardingService {
     private final UserFormRepository userFormRepository;
     private final CompanyRepository companyRepository;
 
+    /**
+     * USER 온보딩 — 절대 수정하지 않음
+     */
     public UserOnboardingResponse onboardUser(Long accountId, UserOnboardingRequest req) {
 
         Account account = accountRepository.findById(accountId)
-                .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 accountId"));
+                .orElseThrow(() -> new OnboardingException(OnboardingErrorCode.ACCOUNT_NOT_FOUND));
 
         if (account.getAccountType() != Account.AccountType.USER) {
-            throw new IllegalArgumentException("USER 계정만 유저 온보딩을 수행할 수 있습니다.");
+            throw new OnboardingException(OnboardingErrorCode.INVALID_ACCOUNT_TYPE);
         }
 
+        // 생년월일 파싱
         LocalDate birth = null;
         if (req.getBirth() != null && !req.getBirth().isBlank()) {
-            birth = LocalDate.parse(req.getBirth());
+            try {
+                birth = LocalDate.parse(req.getBirth());
+            } catch (Exception e) {
+                throw new OnboardingException(OnboardingErrorCode.INVALID_BIRTH_FORMAT);
+            }
         }
 
-        UserForm form = userFormRepository.findById(accountId)
-                .orElse(UserForm.builder()
-                        .account(account)
-                        .accountId(accountId)
-                        .build()
-                );
+        // 기존 유저폼 조회
+        UserForm form = userFormRepository.findById(accountId).orElse(null);
 
-        form.setName(req.getRealName());
-        form.setBirth(birth);
-        form.setAddress(req.getAddress());
-        form.setDetailaddress(req.getDetailAddress());
-        form.setZonecode(req.getZonecode());
+        if (form != null) {
+            throw new OnboardingException(OnboardingErrorCode.USER_ALREADY_ONBOARDED);
+        }
 
-        userFormRepository.save(form);
+        // 신규 생성만 허용
+        form = UserForm.builder()
+                .accountId(accountId)
+                .name(req.getRealName())
+                .birth(birth)
+                .address(req.getAddress())
+                .detailAddress(req.getDetailAddress())
+                .zonecode(req.getZonecode())
+                .build();
+
+        userFormRepository.saveAndFlush(form);
 
         return UserOnboardingResponse.from(form);
     }
 
-    /**
-     * COMPANY 온보딩
-     * - accountType 이 COMPANY 인 계정만 허용
-     * - 이미 companies row 가 있으면 업데이트, 없으면 생성
-     */
+
     public CompanyOnboardingResponse onboardCompany(Long accountId, CompanyOnboardingRequest req) {
 
         Account account = accountRepository.findById(accountId)
-                .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 accountId"));
+                .orElseThrow(() -> new OnboardingException(OnboardingErrorCode.ACCOUNT_NOT_FOUND));
 
         if (account.getAccountType() != Account.AccountType.COMPANY) {
-            throw new IllegalArgumentException("COMPANY 계정만 회사 온보딩을 수행할 수 있습니다.");
+            throw new OnboardingException(OnboardingErrorCode.INVALID_ACCOUNT_TYPE);
         }
 
-        Company company = companyRepository.findById(accountId)
-                .orElse(Company.builder()
-                        .account(account)
-                        .accountId(accountId)
-                        .build()
-                );
+        // 기존 온보딩 여부 확인 (1회 제한)
+        Company company = companyRepository.findById(accountId).orElse(null);
+        if (company != null) {
+            throw new OnboardingException(OnboardingErrorCode.COMPANY_ALREADY_ONBOARDED);
+        }
 
-        company.setCompanyName(req.getCompanyName());
-        company.setDescription(req.getDescription());
-        company.setLocation(req.getLocation());
-        company.setLogoUrl(req.getLogoUrl());
+        // UserForm과 동일한 구조: 단순 PK 기반 신규 엔티티 생성
+        company = Company.builder()
+                .accountId(accountId)               // PK
+                .companyName(req.getCompanyName())
+                .zonecode(req.getZonecode())
+                .address(req.getAddress())
+                .detailAddress(req.getDetailAddress())
+                .businessNumber(req.getBusinessNumber())
+                .build();
 
-        companyRepository.save(company);
+        companyRepository.saveAndFlush(company);
 
         return CompanyOnboardingResponse.from(company);
     }

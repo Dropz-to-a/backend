@@ -48,3 +48,15 @@ spring:
 jwt:
   secret: "12345678901234567890123456789012"
   expiration-ms: 3600000
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.springframework.web: DEBUG
+    org.springframework.web.filter.CommonsRequestLoggingFilter: DEBUG
+    org.springframework: DEBUG
+    com.jobmanager: DEBUG
+
+bizapi:
+  base-url: "https://api.odcloud.kr/api/nts-businessman"
+  service-key: "cb32731267cdcc15e0f5c1acd046a6420bc0ee844fd25921b737ca43d81a7dcc"

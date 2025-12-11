@@ -22,7 +22,7 @@ public class UserOnboardingResponse {
                 .realName(form.getName())
                 .birth(form.getBirth() != null ? form.getBirth().toString() : null)
                 .address(form.getAddress())
-                .detailAddress(form.getDetailaddress())
+                .detailAddress(form.getDetailAddress())
                 .zonecode(form.getZonecode())
                 .build();
     }

@@ -32,14 +32,22 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+                        // Swagger
                         .requestMatchers(
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html"
                         ).permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/auth/register", "/api/auth/login")
-                        .permitAll()
+
+                        // Error 처리
+                        .requestMatchers("/error").permitAll()
+
+                        // 회원가입 + 로그인 허용
+                        .requestMatchers("/api/auth/**").permitAll()
+
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
@@ -64,10 +72,7 @@ public class SecurityConfig {
         config.addAllowedOriginPattern("*");
         config.addAllowedMethod("*");
         config.addAllowedHeader("*");
-
-        // 핵심: OPTIONS 명확하게 허용
         config.addAllowedMethod("OPTIONS");
-
         config.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
