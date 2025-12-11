@@ -3,12 +3,10 @@ package com.jobmanager.job_manager.repository.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jobmanager.job_manager.dto.payments.PaymentSnapshot;
-import com.jobmanager.job_manager.repository.PaymentOrderStore;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
