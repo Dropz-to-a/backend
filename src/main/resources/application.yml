@@ -18,14 +18,6 @@ management:
       exposure:
         include: health,info
 
-# === 토스/결제 공통 설정 ===
-toss:
-  base-url: https://api.tosspayments.com/v1
-  secret-key: ${TOSS_SECRET_KEY:}
-
-payments:
-  success-url: ${PAY_SUCCESS_URL:https://localhost:5173/pay/success}
-  fail-url: ${PAY_FAIL_URL:https://localhost:5173/pay/fail}
 
 ---
 spring:
