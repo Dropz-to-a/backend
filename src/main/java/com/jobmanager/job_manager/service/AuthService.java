@@ -2,8 +2,8 @@ package com.jobmanager.job_manager.service;
 
 import com.jobmanager.job_manager.dto.auth.RegisterRequest;
 import com.jobmanager.job_manager.entity.*;
-import com.jobmanager.job_manager.global.exception.BusinessException;
-import com.jobmanager.job_manager.global.exception.ErrorCode;
+import com.jobmanager.job_manager.global.exception.exceptions.BusinessException;
+import com.jobmanager.job_manager.global.exception.errorcodes.AuthErrorCode;
 import com.jobmanager.job_manager.global.jwt.JwtTokenProvider;
 import com.jobmanager.job_manager.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -30,14 +30,14 @@ public class AuthService {
         // username 중복 체크
         accountRepo.findByUsername(req.getUsername())
                 .ifPresent(a -> {
-                    throw new BusinessException(ErrorCode.USERNAME_ALREADY_EXISTS);
+                    throw new BusinessException(AuthErrorCode.USERNAME_ALREADY_EXISTS);
                 });
 
         // email 중복 체크
         if (req.getEmail() != null && !req.getEmail().isBlank()) {
             accountRepo.findByEmail(req.getEmail())
                     .ifPresent(a -> {
-                        throw new BusinessException(ErrorCode.EMAIL_ALREADY_EXISTS);
+                        throw new BusinessException(AuthErrorCode.EMAIL_ALREADY_EXISTS);
                     });
         }
 
@@ -81,15 +81,15 @@ public class AuthService {
         // username 또는 email 로 로그인
         Account acc = accountRepo.findByUsername(id)
                 .or(() -> accountRepo.findByEmail(id))
-                .orElseThrow(() -> new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(AuthErrorCode.ACCOUNT_NOT_FOUND));
 
         // 비밀번호 정보 체크
         Credential cred = credRepo.findByAccountId(acc.getId())
-                .orElseThrow(() -> new BusinessException(ErrorCode.INTERNAL_ERROR));
+                .orElseThrow(() -> new BusinessException(AuthErrorCode.INTERNAL_ERROR));
 
         // 비밀번호 비교
         if (!passwordEncoder.matches(rawPassword, cred.getPasswordHash())) {
-            throw new BusinessException(ErrorCode.PASSWORD_MISMATCH);
+            throw new BusinessException(AuthErrorCode.PASSWORD_MISMATCH);
         }
 
         // 역할 조회
@@ -116,10 +116,10 @@ public class AuthService {
         try {
             long id = Long.parseLong(roleOrId);
             return roleRepo.findById(id)
-                    .orElseThrow(() -> new BusinessException(ErrorCode.ROLE_NOT_FOUND));
+                    .orElseThrow(() -> new BusinessException(AuthErrorCode.ROLE_NOT_FOUND));
         } catch (NumberFormatException ignore) {
             return roleRepo.findByCode(roleOrId)
-                    .orElseThrow(() -> new BusinessException(ErrorCode.ROLE_NOT_FOUND));
+                    .orElseThrow(() -> new BusinessException(AuthErrorCode.ROLE_NOT_FOUND));
         }
     }
 

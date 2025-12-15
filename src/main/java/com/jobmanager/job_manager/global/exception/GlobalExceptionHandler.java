@@ -1,7 +1,9 @@
 package com.jobmanager.job_manager.global.exception;
 
-import com.jobmanager.job_manager.global.exception.BusinessException;
-import com.jobmanager.job_manager.global.exception.ErrorCode;
+import com.jobmanager.job_manager.global.exception.errorcodes.AuthErrorCode;
+import com.jobmanager.job_manager.global.exception.errorcodes.OnboardingErrorCode;
+import com.jobmanager.job_manager.global.exception.exceptions.BusinessException;
+import com.jobmanager.job_manager.global.exception.exceptions.OnboardingException;
 import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -38,14 +40,14 @@ public class GlobalExceptionHandler {
         );
     }
 
-    // =========================================
-    // 0) BusinessException (핵심)
-    // =========================================
+    // ========================================================================
+    // 0) BusinessException (AuthErrorCode 사용)
+    // ========================================================================
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ErrorResponse> handleBusinessException(
             BusinessException e, HttpServletRequest req
     ) {
-        ErrorCode code = e.getErrorCode();
+        AuthErrorCode code = e.getErrorCode();
 
         ErrorResponse body = new ErrorResponse(
                 code.getStatus().value(),
@@ -57,13 +59,12 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity
                 .status(code.getStatus())
-                .header("Content-Type", "application/json;charset=UTF-8")
                 .body(body);
     }
 
-    // =========================================
+    // ========================================================================
     // 1) 잘못된 요청 파라미터
-    // =========================================
+    // ========================================================================
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<ErrorResponse> handleMissingParam(
@@ -98,10 +99,9 @@ public class GlobalExceptionHandler {
                 .body(build(HttpStatus.BAD_REQUEST, msg, req));
     }
 
-    // =========================================
+    // ========================================================================
     // 2) 권한 오류
-    // =========================================
-
+    // ========================================================================
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorResponse> handleAccessDenied(
             AccessDeniedException e, HttpServletRequest req
@@ -112,10 +112,9 @@ public class GlobalExceptionHandler {
                         req));
     }
 
-    // =========================================
+    // ========================================================================
     // 3) DB 제약조건 위반
-    // =========================================
-
+    // ========================================================================
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ErrorResponse> handleDataIntegrity(
             DataIntegrityViolationException e, HttpServletRequest req
@@ -135,10 +134,9 @@ public class GlobalExceptionHandler {
                 .body(build(HttpStatus.CONFLICT, msg, req));
     }
 
-    // =========================================
+    // ========================================================================
     // 4) Content-Type 오류
-    // =========================================
-
+    // ========================================================================
     @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
     public ResponseEntity<ErrorResponse> handleMediaType(
             HttpMediaTypeNotSupportedException e, HttpServletRequest req
@@ -149,9 +147,29 @@ public class GlobalExceptionHandler {
                         req));
     }
 
-    // =========================================
-    // 5) 예상 못한 모든 오류
-    // =========================================
+    // ========================================================================
+    // 5) OnboardingException (OnboardingErrorCode 사용)
+    // ========================================================================
+    @ExceptionHandler(OnboardingException.class)
+    public ResponseEntity<ErrorResponse> handleOnboardingException(
+            OnboardingException e, HttpServletRequest req
+    ) {
+        OnboardingErrorCode code = e.getErrorCode();
+
+        ErrorResponse body = new ErrorResponse(
+                code.getStatus().value(),
+                code.getStatus().getReasonPhrase(),
+                code.getMessage(),
+                req.getRequestURI(),
+                LocalDateTime.now()
+        );
+
+        return ResponseEntity.status(code.getStatus()).body(body);
+    }
+
+    // ========================================================================
+    // 6) 기타 예상 못한 오류
+    // ========================================================================
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception e, HttpServletRequest req) {
         e.printStackTrace();

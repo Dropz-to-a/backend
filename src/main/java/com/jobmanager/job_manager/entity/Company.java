@@ -15,13 +15,38 @@ import java.time.LocalDateTime;
 public class Company {
 
     @Id
-    private Long accountId;   // companies.account_id (PK & FK)
+    @Column(name = "account_id")
+    private Long accountId;
 
-    private String companyName;   // company_name
-    private String description;   // description
-    private String location;      // location
-    private String logoUrl;       // logo_url
+    @Column(name = "company_name", nullable = false)
+    private String companyName;
 
+    @Column(nullable = false)
+    private String zonecode;
+
+    @Column(nullable = false)
+    private String address;
+
+    @Column(name = "detail_address", nullable = false)
+    private String detailAddress;
+
+    @Column(name = "business_number", nullable = false)
+    private String businessNumber;
+
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @PrePersist
+    void onCreate() {
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = this.createdAt;
+    }
+
+    @PreUpdate
+    void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
 }
