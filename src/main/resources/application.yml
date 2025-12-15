@@ -18,6 +18,14 @@ management:
       exposure:
         include: health,info
 
+# === 토스/결제 공통 설정 ===
+toss:
+  base-url: https://api.tosspayments.com/v1
+  secret-key: ${TOSS_SECRET_KEY:}
+
+payments:
+  success-url: ${PAY_SUCCESS_URL:https://localhost:5173/pay/success}
+  fail-url: ${PAY_FAIL_URL:https://localhost:5173/pay/fail}
 
 ---
 spring:
@@ -48,3 +56,7 @@ logging:
     org.springframework.web.filter.CommonsRequestLoggingFilter: DEBUG
     org.springframework: DEBUG
     com.jobmanager: DEBUG
+
+bizapi:
+  base-url: "https://api.odcloud.kr/api/nts-businessman"
+  service-key: "cb32731267cdcc15e0f5c1acd046a6420bc0ee844fd25921b737ca43d81a7dcc"
