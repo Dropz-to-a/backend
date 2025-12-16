@@ -57,4 +57,20 @@ public class JwtTokenProvider {
     public Long getAccountId(String token) {
         return Long.valueOf(parse(token).getSubject());
     }
+
+    /** 토큰에서 username 가져오기 */
+    public String getUsername(String token) {
+        return parse(token).get("username", String.class);
+    }
+
+    /** 토큰에서 accountType 가져오기 (USER / COMPANY / ADMIN) */
+    public String getAccountType(String token) {
+        return parse(token).get("type", String.class);
+    }
+
+    /** 토큰에서 roleCode 가져오기 (ROLE_USER / ROLE_COMPANY / ROLE_ADMIN) */
+    public String getRole(String token) {
+        return parse(token).get("role", String.class);
+    }
+
 }

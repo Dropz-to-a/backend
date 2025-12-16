@@ -2,7 +2,10 @@ package com.jobmanager.job_manager.controller;
 
 import com.jobmanager.job_manager.dto.auth.AuthResponse;
 import com.jobmanager.job_manager.dto.auth.LoginRequest;
+import com.jobmanager.job_manager.dto.auth.MeResponse;
 import com.jobmanager.job_manager.dto.auth.RegisterRequest;
+import com.jobmanager.job_manager.global.jwt.JwtHeaderUtils;
+import com.jobmanager.job_manager.global.jwt.JwtTokenProvider;
 import com.jobmanager.job_manager.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -17,9 +20,8 @@ import org.springframework.web.bind.annotation.*;
 @Tag(
         name = "Auth",
         description = """
-            회원가입 / 로그인 관련 API입니다.
+            회원가입 / 로그인 / 내 정보 조회 API입니다.
             - JWT 기반 인증을 사용합니다.
-            - 로그인 시 Access Token을 발급합니다.
             - ROLE_USER / ROLE_COMPANY / ROLE_ADMIN 권한을 사용합니다.
             """
 )
@@ -29,9 +31,10 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    private final JwtTokenProvider jwt;
 
     // ============================================================
-    // 회원가입(Register)
+    // 회원가입
     // ============================================================
     @Operation(
             summary = "회원가입",
@@ -51,11 +54,9 @@ public class AuthController {
                 """,
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     required = true,
-                    description = "회원가입 요청 데이터",
                     content = @Content(
                             schema = @Schema(implementation = RegisterRequest.class),
                             examples = @ExampleObject(
-                                    name = "회사 계정 회원가입 예시",
                                     value = """
                                     {
                                       "username": "dropz_company",
@@ -69,62 +70,73 @@ public class AuthController {
                     )
             )
     )
-    @ApiResponse(
-            responseCode = "200",
-            description = "회원가입 성공",
-            content = @Content(
-                    mediaType = "text/plain",
-                    examples = @ExampleObject(value = "OK")
-            )
-    )
+    @ApiResponse(responseCode = "200", description = "회원가입 성공")
     @PostMapping("/register")
     public String register(@RequestBody RegisterRequest req) {
         authService.register(req);
         return "OK";
     }
 
-
     // ============================================================
-    // 로그인(Login)
+    // 로그인 (JSON)
     // ============================================================
     @Operation(
             summary = "로그인",
             description = """
-                username 또는 email + password 로 로그인합니다.
-                JSON 형식으로 요청해야 합니다.
+                username 또는 email + password로 로그인합니다.
+                반드시 JSON 형식으로 요청해야 합니다.
 
-                요청 형식(JSON):
+                요청 예시:
                 {
-                  "id": "dropz_user",
+                  "id": "alvin",
                   "password": "1234"
                 }
-
-                응답:
-                - accessToken : Bearer 인증에 사용
                 """
     )
     @ApiResponse(
             responseCode = "200",
             description = "로그인 성공",
             content = @Content(
-                    mediaType = "application/json",
                     schema = @Schema(implementation = AuthResponse.class),
                     examples = @ExampleObject(
-                            name = "성공 예시",
                             value = """
                             {
-                              "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                              "accessToken": "eyJhbGciOiJIUzI1NiJ9..."
                             }
                             """
                     )
             )
     )
     @PostMapping("/login")
-    public AuthResponse login(
-            @Parameter(description = "로그인 요청 JSON", required = true)
-            @RequestBody LoginRequest req
-    ) {
+    public AuthResponse login(@RequestBody LoginRequest req) {
         String token = authService.login(req.getId(), req.getPassword());
         return new AuthResponse(token);
+    }
+
+    // ============================================================
+    // 내 계정 정보 조회 (역할 판단용)
+    // ============================================================
+    @Operation(
+            summary = "내 계정 정보 조회",
+            description = "현재 로그인한 사용자의 accountId, username, accountType, role 정보를 반환합니다."
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "조회 성공",
+            content = @Content(
+                    schema = @Schema(implementation = MeResponse.class)
+            )
+    )
+    @GetMapping("/me")
+    public MeResponse me() {
+
+        String token = JwtHeaderUtils.getTokenFromHeader();
+
+        return new MeResponse(
+                jwt.getAccountId(token),
+                jwt.getUsername(token),
+                jwt.getAccountType(token),
+                jwt.getRole(token)
+        );
     }
 }
