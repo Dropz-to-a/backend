@@ -26,36 +26,51 @@ public class OnboardingService {
     private final CompanyRepository companyRepository;
 
     /**
-     * USER 온보딩 — 절대 수정하지 않음
+     * USER 온보딩 — 신규 1회만 허용
      */
     public UserOnboardingResponse onboardUser(Long accountId, UserOnboardingRequest req) {
 
+        // 1. 계정 존재 여부
         Account account = accountRepository.findById(accountId)
-                .orElseThrow(() -> new OnboardingException(OnboardingErrorCode.ACCOUNT_NOT_FOUND));
+                .orElseThrow(() ->
+                        new OnboardingException(OnboardingErrorCode.ACCOUNT_NOT_FOUND)
+                );
 
+        // 2. 계정 타입 검증
         if (account.getAccountType() != Account.AccountType.USER) {
-            throw new OnboardingException(OnboardingErrorCode.INVALID_ACCOUNT_TYPE);
+            throw new OnboardingException(
+                    OnboardingErrorCode.COMPANY_CANNOT_ONBOARD_USER
+            );
         }
 
-        // 생년월일 파싱
+        // 3. 중복 온보딩 방지
+        if (userFormRepository.existsById(accountId)) {
+            throw new OnboardingException(
+                    OnboardingErrorCode.USER_ALREADY_ONBOARDED
+            );
+        }
+
+        // 4. 생년월일 파싱
         LocalDate birth = null;
         if (req.getBirth() != null && !req.getBirth().isBlank()) {
             try {
                 birth = LocalDate.parse(req.getBirth());
             } catch (Exception e) {
-                throw new OnboardingException(OnboardingErrorCode.INVALID_BIRTH_FORMAT);
+                throw new OnboardingException(
+                        OnboardingErrorCode.INVALID_BIRTH_FORMAT
+                );
             }
         }
 
-        // 기존 유저폼 조회
-        UserForm form = userFormRepository.findById(accountId).orElse(null);
-
-        if (form != null) {
-            throw new OnboardingException(OnboardingErrorCode.USER_ALREADY_ONBOARDED);
+        // 5. 필수값 검증 (방어적)
+        if (req.getRealName() == null || req.getRealName().isBlank()) {
+            throw new OnboardingException(
+                    OnboardingErrorCode.REQUIRED_FIELD_MISSING
+            );
         }
 
-        // 신규 생성만 허용
-        form = UserForm.builder()
+        // 6. 신규 UserForm 생성
+        UserForm form = UserForm.builder()
                 .accountId(accountId)
                 .name(req.getRealName())
                 .birth(birth)
@@ -69,25 +84,41 @@ public class OnboardingService {
         return UserOnboardingResponse.from(form);
     }
 
-
+    /**
+     * COMPANY 온보딩 — 신규 1회만 허용
+     */
     public CompanyOnboardingResponse onboardCompany(Long accountId, CompanyOnboardingRequest req) {
 
+        // 1. 계정 존재 여부
         Account account = accountRepository.findById(accountId)
-                .orElseThrow(() -> new OnboardingException(OnboardingErrorCode.ACCOUNT_NOT_FOUND));
+                .orElseThrow(() ->
+                        new OnboardingException(OnboardingErrorCode.ACCOUNT_NOT_FOUND)
+                );
 
+        // 2. 계정 타입 검증
         if (account.getAccountType() != Account.AccountType.COMPANY) {
-            throw new OnboardingException(OnboardingErrorCode.INVALID_ACCOUNT_TYPE);
+            throw new OnboardingException(
+                    OnboardingErrorCode.USER_CANNOT_ONBOARD_COMPANY
+            );
         }
 
-        // 기존 온보딩 여부 확인 (1회 제한)
-        Company company = companyRepository.findById(accountId).orElse(null);
-        if (company != null) {
-            throw new OnboardingException(OnboardingErrorCode.COMPANY_ALREADY_ONBOARDED);
+        // 3. 중복 온보딩 방지
+        if (companyRepository.existsById(accountId)) {
+            throw new OnboardingException(
+                    OnboardingErrorCode.COMPANY_ALREADY_ONBOARDED
+            );
         }
 
-        // UserForm과 동일한 구조: 단순 PK 기반 신규 엔티티 생성
-        company = Company.builder()
-                .accountId(accountId)               // PK
+        // 4. 필수값 검증
+        if (req.getCompanyName() == null || req.getCompanyName().isBlank()) {
+            throw new OnboardingException(
+                    OnboardingErrorCode.REQUIRED_FIELD_MISSING
+            );
+        }
+
+        // 5. 신규 Company 생성
+        Company company = Company.builder()
+                .accountId(accountId)
                 .companyName(req.getCompanyName())
                 .zonecode(req.getZonecode())
                 .address(req.getAddress())
