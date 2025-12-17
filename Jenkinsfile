@@ -1,6 +1,11 @@
 pipeline {
     agent any
 
+    environment {
+        JAVA_HOME = "/usr/lib/jvm/java-21-amazon-corretto"
+        PATH = "${JAVA_HOME}/bin:${env.PATH}"
+    }
+
     stages {
 
         stage('Checkout') {
@@ -12,6 +17,7 @@ pipeline {
         stage('Build') {
             steps {
                 sh '''
+                    java -version
                     chmod +x gradlew
                     ./gradlew clean build -x test
                 '''
