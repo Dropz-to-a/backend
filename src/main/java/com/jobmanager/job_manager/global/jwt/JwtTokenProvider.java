@@ -28,7 +28,8 @@ public class JwtTokenProvider {
     public String generate(Long accountId,
                            String username,
                            String accountType,
-                           String roleCode) {
+                           String roleCode,
+                           boolean onboarded) {
 
         Date now = new Date();
         Date expiry = new Date(now.getTime() + expirationMs);
@@ -38,6 +39,7 @@ public class JwtTokenProvider {
                 .claim("username", username)
                 .claim("type", accountType)
                 .claim("role", roleCode)
+                .claim("onboarded", onboarded)
                 .setIssuedAt(now)
                 .setExpiration(expiry)
                 .signWith(key, SignatureAlgorithm.HS256)

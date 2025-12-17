@@ -23,6 +23,8 @@ public class AuthService {
     private final AccountRoleRepository arRepo;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwt;
+    private final UserFormRepository userFormRepository;
+    private final CompanyRepository companyRepository;
 
     @Transactional
     public void register(RegisterRequest req) {
@@ -98,13 +100,15 @@ public class AuthService {
 
         roleCode = defaultRoleIfBlank(roleCode);
         Account.AccountType type = mapRoleToAccountType(roleCode);
+        boolean onboarded = isOnboarded(acc);
 
         // JWT 토큰 발급
         return jwt.generate(
                 acc.getId(),
                 acc.getUsername(),
                 type.name(),
-                roleCode
+                roleCode,
+                onboarded
         );
     }
 
@@ -131,6 +135,20 @@ public class AuthService {
             case "ROLE_COMPANY", "2" -> Account.AccountType.COMPANY;
             case "ROLE_ADMIN", "3" -> Account.AccountType.ADMIN;
             default -> Account.AccountType.USER;
+        };
+    }
+
+    private boolean isOnboarded(Account acc) {
+
+        return switch (acc.getAccountType()) {
+            case USER ->
+                    userFormRepository.existsById(acc.getId());
+
+            case COMPANY ->
+                    companyRepository.existsById(acc.getId());
+
+            case ADMIN ->
+                    true;
         };
     }
 }
