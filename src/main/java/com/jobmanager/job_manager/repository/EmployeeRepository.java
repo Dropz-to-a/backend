@@ -14,6 +14,9 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     /** 회사 + 직원 매핑 확인 */
     Optional<Employee> findByCompanyIdAndEmployeeId(Long companyId, Long employeeId);
 
+    /** 직원ID로 회사 조회*/
+    Optional<Employee> findByEmployeeId(Long employeeId);
+
     /** 소속 여부 체크용 */
     boolean existsByCompanyIdAndEmployeeId(Long companyId, Long employeeId);
 

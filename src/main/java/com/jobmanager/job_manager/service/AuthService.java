@@ -25,17 +25,16 @@ public class AuthService {
     private final JwtTokenProvider jwt;
     private final UserFormRepository userFormRepository;
     private final CompanyRepository companyRepository;
+    private final EmployeeRepository employeeRepository; // ★ 추가
 
     @Transactional
     public void register(RegisterRequest req) {
 
-        // username 중복 체크
         accountRepo.findByUsername(req.getUsername())
                 .ifPresent(a -> {
                     throw new BusinessException(AuthErrorCode.USERNAME_ALREADY_EXISTS);
                 });
 
-        // email 중복 체크
         if (req.getEmail() != null && !req.getEmail().isBlank()) {
             accountRepo.findByEmail(req.getEmail())
                     .ifPresent(a -> {
@@ -43,13 +42,10 @@ public class AuthService {
                     });
         }
 
-        // 역할 코드 매핑
         String roleCode = defaultRoleIfBlank(req.getRoleCode());
         Role role = resolveRole(roleCode);
-
         Account.AccountType mappedType = mapRoleToAccountType(role.getCode());
 
-        // Account 저장
         Account acc = Account.builder()
                 .accountType(mappedType)
                 .username(req.getUsername())
@@ -60,7 +56,6 @@ public class AuthService {
 
         acc = accountRepo.save(acc);
 
-        // Credential 저장
         Credential cred = Credential.builder()
                 .account(acc)
                 .passwordHash(passwordEncoder.encode(req.getPassword()))
@@ -70,7 +65,6 @@ public class AuthService {
 
         credRepo.save(cred);
 
-        // AccountRole 저장
         arRepo.save(AccountRole.builder()
                 .accountId(acc.getId())
                 .roleId(role.getId())
@@ -80,21 +74,17 @@ public class AuthService {
 
     public String login(String id, String rawPassword) {
 
-        // username 또는 email 로 로그인
         Account acc = accountRepo.findByUsername(id)
                 .or(() -> accountRepo.findByEmail(id))
                 .orElseThrow(() -> new BusinessException(AuthErrorCode.ACCOUNT_NOT_FOUND));
 
-        // 비밀번호 정보 체크
         Credential cred = credRepo.findByAccountId(acc.getId())
                 .orElseThrow(() -> new BusinessException(AuthErrorCode.INTERNAL_ERROR));
 
-        // 비밀번호 비교
         if (!passwordEncoder.matches(rawPassword, cred.getPasswordHash())) {
             throw new BusinessException(AuthErrorCode.PASSWORD_MISMATCH);
         }
 
-        // 역할 조회
         String roleCode = arRepo.findTopRoleCodeByAccountId(acc.getId())
                 .orElse("ROLE_USER");
 
@@ -102,13 +92,25 @@ public class AuthService {
         Account.AccountType type = mapRoleToAccountType(roleCode);
         boolean onboarded = isOnboarded(acc);
 
-        // JWT 토큰 발급
+        // =========================
+        // USER 소속 회사명 조회
+        // =========================
+        String companyName = null;
+
+        if (type == Account.AccountType.USER) {
+            companyName = employeeRepository.findByEmployeeId(acc.getId())
+                    .flatMap(emp -> companyRepository.findById(emp.getCompanyId()))
+                    .map(Company::getCompanyName)
+                    .orElse(null);
+        }
+
         return jwt.generate(
                 acc.getId(),
                 acc.getUsername(),
                 type.name(),
                 roleCode,
-                onboarded
+                onboarded,
+                companyName // ★ 추가
         );
     }
 
