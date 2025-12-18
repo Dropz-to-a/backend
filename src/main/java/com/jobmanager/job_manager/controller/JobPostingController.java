@@ -3,12 +3,14 @@ package com.jobmanager.job_manager.controller;
 import com.jobmanager.job_manager.dto.jobposting.JobPostingCreateRequest;
 import com.jobmanager.job_manager.dto.jobposting.JobPostingHistoryResponse;
 import com.jobmanager.job_manager.dto.jobposting.JobPostingManageResponse;
+import com.jobmanager.job_manager.global.jwt.SimpleUserPrincipal;
 import com.jobmanager.job_manager.service.JobPostingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -36,10 +38,13 @@ public class JobPostingController {
     )
     @PostMapping
     public ResponseEntity<Void> createPosting(
-            @RequestAttribute("companyId") Long companyId,
+            @AuthenticationPrincipal SimpleUserPrincipal principal,
             @RequestBody JobPostingCreateRequest request
     ) {
-        jobPostingService.createPosting(companyId, request);
+        jobPostingService.createPosting(
+                principal.getAccountId(),
+                request
+        );
         return ResponseEntity.ok().build();
     }
 
@@ -54,10 +59,12 @@ public class JobPostingController {
     )
     @GetMapping
     public ResponseEntity<List<JobPostingManageResponse>> getMyPostings(
-            @RequestAttribute("companyId") Long companyId
+            @AuthenticationPrincipal SimpleUserPrincipal principal
     ) {
         return ResponseEntity.ok(
-                jobPostingService.getMyPostings(companyId)
+                jobPostingService.getMyPostings(
+                        principal.getAccountId()
+                )
         );
     }
 
@@ -72,10 +79,12 @@ public class JobPostingController {
     )
     @GetMapping("/history")
     public ResponseEntity<List<JobPostingHistoryResponse>> getHistory(
-            @RequestAttribute("companyId") Long companyId
+            @AuthenticationPrincipal SimpleUserPrincipal principal
     ) {
         return ResponseEntity.ok(
-                jobPostingService.getPostingHistory(companyId)
+                jobPostingService.getPostingHistory(
+                        principal.getAccountId()
+                )
         );
     }
 
@@ -92,9 +101,12 @@ public class JobPostingController {
     @PatchMapping("/{postingId}/close")
     public ResponseEntity<Void> closePosting(
             @PathVariable Long postingId,
-            @RequestAttribute("companyId") Long companyId
+            @AuthenticationPrincipal SimpleUserPrincipal principal
     ) {
-        jobPostingService.closePosting(postingId, companyId);
+        jobPostingService.closePosting(
+                postingId,
+                principal.getAccountId()
+        );
         return ResponseEntity.ok().build();
     }
 }
