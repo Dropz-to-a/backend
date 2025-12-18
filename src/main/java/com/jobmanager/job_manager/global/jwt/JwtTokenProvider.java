@@ -43,7 +43,7 @@ public class JwtTokenProvider {
                 .claim("type", accountType)
                 .claim("role", roleCode)
                 .claim("onboarded", onboarded)
-                .claim("companyName", companyName) // ★ USER 소속 회사명
+                .claim("companyName", companyName)
                 .setIssuedAt(now)
                 .setExpiration(expiry)
                 .signWith(key, SignatureAlgorithm.HS256)

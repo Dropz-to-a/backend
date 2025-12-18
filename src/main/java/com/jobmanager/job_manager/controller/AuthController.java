@@ -91,6 +91,13 @@ public class AuthController {
                   "id": "alvin",
                   "password": "1234"
                 }
+                
+                JWT Token에 실려 보내지는 값
+                - 유저 이름
+                - 계정 타입(user, company)
+                - 계정 역할(ROLE_USER, ROLE_COMPANY)
+                - onboard 여부(true, false)
+                - 소속된 회사 이름(소속되어있지 않을 경우 출력 X, User만 출력됨)
                 """
     )
     @ApiResponse(
