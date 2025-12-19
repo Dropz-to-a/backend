@@ -16,6 +16,10 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
+import com.jobmanager.job_manager.global.exception.errorcodes.ProfileErrorCode;
+import com.jobmanager.job_manager.global.exception.exceptions.ProfileException;
+import com.jobmanager.job_manager.global.exception.errorcodes.UserFamilyErrorCode;
+import com.jobmanager.job_manager.global.exception.exceptions.UserFamilyException;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -195,7 +199,47 @@ public class GlobalExceptionHandler {
     }
 
     // ========================================================================
-    // 6) 기타 예상 못한 오류 (진짜 500)
+    // 6) ProfileException (Profile 도메인 전용)
+    // ========================================================================
+    @ExceptionHandler(ProfileException.class)
+    public ResponseEntity<ErrorResponse> handleProfileException(
+            ProfileException e, HttpServletRequest req
+    ) {
+        ProfileErrorCode code = e.getErrorCode();
+
+        ErrorResponse body = new ErrorResponse(
+                code.getStatus().value(),
+                code.getStatus().getReasonPhrase(),
+                code.getMessage(),
+                req.getRequestURI(),
+                LocalDateTime.now()
+        );
+
+        return ResponseEntity.status(code.getStatus()).body(body);
+    }
+
+    // ========================================================================
+    // 7) UserFamilyException (UserFamily 도메인 전용)
+    // ========================================================================
+    @ExceptionHandler(UserFamilyException.class)
+    public ResponseEntity<ErrorResponse> handleUserFamilyException(
+            UserFamilyException e, HttpServletRequest req
+    ) {
+        UserFamilyErrorCode code = e.getErrorCode();
+
+        ErrorResponse body = new ErrorResponse(
+                code.getStatus().value(),
+                code.getStatus().getReasonPhrase(),
+                code.getMessage(),
+                req.getRequestURI(),
+                LocalDateTime.now()
+        );
+
+        return ResponseEntity.status(code.getStatus()).body(body);
+    }
+
+    // ========================================================================
+    // 8) 기타 예상 못한 오류 (진짜 500)
     // ========================================================================
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception e, HttpServletRequest req) {

@@ -68,9 +68,6 @@ public class UserForm {
     @Column(name = "activity", columnDefinition = "TEXT")
     private String activity;
 
-    @Column(name = "family", columnDefinition = "TEXT")
-    private String family;
-
     @Column(name = "hobby")
     private String hobby;
 

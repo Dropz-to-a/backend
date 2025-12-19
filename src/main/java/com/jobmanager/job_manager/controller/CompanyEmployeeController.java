@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(
         name = "Company-Employee",
         description = """
-            회사(COMPANY) 계정 기준으로 직원(USER) 및 부서(팀) 소속 관계를 관리하는 API입니다.s
+            회사(COMPANY) 계정 기준으로 직원(USER) 및 부서(팀) 소속 관계를 관리하는 API입니다.
             """
 )
 @RestController
