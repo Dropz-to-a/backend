@@ -6,7 +6,11 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class SimpleUserPrincipal {
-    private Long accountId;     // accounts.id
-    private String accountType; // USER / COMPANY
-    private String role;        // ROLE_USER / ROLE_COMPANY
+
+    private Long accountId;
+    private String accountType;     // USER / COMPANY / ADMIN
+    private String role;            // ROLE_*
+    private Boolean onboarded;      // 온보딩 여부
+    private String companyName;     // USER 전용
+    private String businessNumber;  // COMPANY 전용
 }

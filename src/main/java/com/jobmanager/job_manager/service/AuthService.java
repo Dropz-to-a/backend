@@ -25,21 +25,17 @@ public class AuthService {
     private final JwtTokenProvider jwt;
     private final UserFormRepository userFormRepository;
     private final CompanyRepository companyRepository;
-    private final EmployeeRepository employeeRepository; // ★ 추가
+    private final EmployeeRepository employeeRepository;
 
     @Transactional
     public void register(RegisterRequest req) {
 
         accountRepo.findByUsername(req.getUsername())
-                .ifPresent(a -> {
-                    throw new BusinessException(AuthErrorCode.USERNAME_ALREADY_EXISTS);
-                });
+                .ifPresent(a -> { throw new BusinessException(AuthErrorCode.USERNAME_ALREADY_EXISTS); });
 
         if (req.getEmail() != null && !req.getEmail().isBlank()) {
             accountRepo.findByEmail(req.getEmail())
-                    .ifPresent(a -> {
-                        throw new BusinessException(AuthErrorCode.EMAIL_ALREADY_EXISTS);
-                    });
+                    .ifPresent(a -> { throw new BusinessException(AuthErrorCode.EMAIL_ALREADY_EXISTS); });
         }
 
         String roleCode = defaultRoleIfBlank(req.getRoleCode());
@@ -92,15 +88,21 @@ public class AuthService {
         Account.AccountType type = mapRoleToAccountType(roleCode);
         boolean onboarded = isOnboarded(acc);
 
-        // =========================
-        // USER 소속 회사명 조회
-        // =========================
         String companyName = null;
+        String businessNumber = null;
 
+        // USER → 소속 회사명
         if (type == Account.AccountType.USER) {
             companyName = employeeRepository.findByEmployeeId(acc.getId())
                     .flatMap(emp -> companyRepository.findById(emp.getCompanyId()))
                     .map(Company::getCompanyName)
+                    .orElse(null);
+        }
+
+        // COMPANY → 사업자번호
+        if (type == Account.AccountType.COMPANY) {
+            businessNumber = companyRepository.findById(acc.getId())
+                    .map(Company::getBusinessNumber)
                     .orElse(null);
         }
 
@@ -110,7 +112,8 @@ public class AuthService {
                 type.name(),
                 roleCode,
                 onboarded,
-                companyName // ★ 추가
+                companyName,
+                businessNumber
         );
     }
 
@@ -130,7 +133,6 @@ public class AuthService {
     }
 
     private Account.AccountType mapRoleToAccountType(String roleCode) {
-
         if (roleCode == null) return Account.AccountType.USER;
 
         return switch (roleCode) {
@@ -141,16 +143,10 @@ public class AuthService {
     }
 
     private boolean isOnboarded(Account acc) {
-
         return switch (acc.getAccountType()) {
-            case USER ->
-                    userFormRepository.existsById(acc.getId());
-
-            case COMPANY ->
-                    companyRepository.existsById(acc.getId());
-
-            case ADMIN ->
-                    true;
+            case USER -> userFormRepository.existsById(acc.getId());
+            case COMPANY -> companyRepository.existsById(acc.getId());
+            case ADMIN -> true;
         };
     }
 }

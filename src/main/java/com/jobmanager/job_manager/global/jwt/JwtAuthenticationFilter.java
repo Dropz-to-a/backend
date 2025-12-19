@@ -24,10 +24,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain chain)
-            throws ServletException, IOException {
+    protected void doFilterInternal(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain chain
+    ) throws ServletException, IOException {
 
         String header = request.getHeader("Authorization");
 
@@ -36,19 +37,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 String token = header.substring(7);
                 Claims claims = provider.parse(token);
 
-                Long accountId = Long.valueOf(claims.getSubject());
-                String type = claims.get("type", String.class);
-                String role = claims.get("role", String.class);
-
                 SimpleUserPrincipal principal = new SimpleUserPrincipal(
-                        accountId, type, role
+                        Long.valueOf(claims.getSubject()),
+                        claims.get("type", String.class),
+                        claims.get("role", String.class),
+                        claims.get("onboarded", Boolean.class),
+                        claims.get("companyName", String.class),
+                        claims.get("businessNumber", String.class)
                 );
 
                 UsernamePasswordAuthenticationToken auth =
                         new UsernamePasswordAuthenticationToken(
                                 principal,
                                 null,
-                                List.of(() -> role)
+                                List.of(() -> principal.getRole())
                         );
 
                 auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

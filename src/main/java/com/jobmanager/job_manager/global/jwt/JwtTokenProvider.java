@@ -31,21 +31,33 @@ public class JwtTokenProvider {
             String accountType,
             String roleCode,
             boolean onboarded,
-            String companyName
+            String companyName,
+            String businessNumber
     ) {
 
         Date now = new Date();
         Date expiry = new Date(now.getTime() + expirationMs);
 
-        return Jwts.builder()
+        var builder = Jwts.builder()
                 .setSubject(String.valueOf(accountId))
                 .claim("username", username)
                 .claim("type", accountType)
                 .claim("role", roleCode)
                 .claim("onboarded", onboarded)
-                .claim("companyName", companyName)
                 .setIssuedAt(now)
-                .setExpiration(expiry)
+                .setExpiration(expiry);
+
+        // USER 전용
+        if (companyName != null) {
+            builder.claim("companyName", companyName);
+        }
+
+        // COMPANY 전용
+        if ("COMPANY".equals(accountType) && businessNumber != null) {
+            builder.claim("businessNumber", businessNumber);
+        }
+
+        return builder
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -74,7 +86,15 @@ public class JwtTokenProvider {
         return parse(token).get("role", String.class);
     }
 
+    public Boolean isOnboarded(String token) {
+        return parse(token).get("onboarded", Boolean.class);
+    }
+
     public String getCompanyName(String token) {
         return parse(token).get("companyName", String.class);
+    }
+
+    public String getBusinessNumber(String token) {
+        return parse(token).get("businessNumber", String.class);
     }
 }
