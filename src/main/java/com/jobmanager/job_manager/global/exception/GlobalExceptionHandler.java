@@ -1,8 +1,10 @@
 package com.jobmanager.job_manager.global.exception;
 
 import com.jobmanager.job_manager.global.exception.errorcodes.AuthErrorCode;
+import com.jobmanager.job_manager.global.exception.errorcodes.CompanyErrorCode;
 import com.jobmanager.job_manager.global.exception.errorcodes.OnboardingErrorCode;
 import com.jobmanager.job_manager.global.exception.exceptions.BusinessException;
+import com.jobmanager.job_manager.global.exception.exceptions.CompanyException;
 import com.jobmanager.job_manager.global.exception.exceptions.OnboardingException;
 import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.servlet.http.HttpServletRequest;
@@ -41,7 +43,7 @@ public class GlobalExceptionHandler {
     }
 
     // ========================================================================
-    // 0) BusinessException (AuthErrorCode 사용)
+    // 0) BusinessException (Auth 전용)
     // ========================================================================
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ErrorResponse> handleBusinessException(
@@ -57,9 +59,27 @@ public class GlobalExceptionHandler {
                 LocalDateTime.now()
         );
 
-        return ResponseEntity
-                .status(code.getStatus())
-                .body(body);
+        return ResponseEntity.status(code.getStatus()).body(body);
+    }
+
+    // ========================================================================
+    // 0-1) CompanyException (Company / Employee 도메인 전용)
+    // ========================================================================
+    @ExceptionHandler(CompanyException.class)
+    public ResponseEntity<ErrorResponse> handleCompanyException(
+            CompanyException e, HttpServletRequest req
+    ) {
+        CompanyErrorCode code = e.getErrorCode();
+
+        ErrorResponse body = new ErrorResponse(
+                code.getStatus().value(),
+                code.getStatus().getReasonPhrase(),
+                code.getMessage(),
+                req.getRequestURI(),
+                LocalDateTime.now()
+        );
+
+        return ResponseEntity.status(code.getStatus()).body(body);
     }
 
     // ========================================================================
@@ -71,9 +91,11 @@ public class GlobalExceptionHandler {
             MissingServletRequestParameterException e, HttpServletRequest req
     ) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(build(HttpStatus.BAD_REQUEST,
+                .body(build(
+                        HttpStatus.BAD_REQUEST,
                         "필수 요청값 '" + e.getParameterName() + "' 이(가) 누락되었습니다.",
-                        req));
+                        req
+                ));
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
@@ -81,9 +103,11 @@ public class GlobalExceptionHandler {
             HttpMessageNotReadableException e, HttpServletRequest req
     ) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(build(HttpStatus.BAD_REQUEST,
+                .body(build(
+                        HttpStatus.BAD_REQUEST,
                         "요청 JSON 형식을 읽을 수 없습니다.",
-                        req));
+                        req
+                ));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -107,9 +131,11 @@ public class GlobalExceptionHandler {
             AccessDeniedException e, HttpServletRequest req
     ) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(build(HttpStatus.FORBIDDEN,
+                .body(build(
+                        HttpStatus.FORBIDDEN,
                         "이 작업을 수행할 권한이 없습니다.",
-                        req));
+                        req
+                ));
     }
 
     // ========================================================================
@@ -124,9 +150,8 @@ public class GlobalExceptionHandler {
         if (e.getMessage() != null) {
             if (e.getMessage().contains("Duplicate entry")) {
                 msg = "이미 존재하는 데이터입니다.";
-            }
-            if (e.getMessage().contains("FOREIGN KEY")) {
-                msg = "존재하지 않는 참조로 인해 작업 실패";
+            } else if (e.getMessage().contains("FOREIGN KEY")) {
+                msg = "존재하지 않는 참조로 인해 작업이 실패했습니다.";
             }
         }
 
@@ -142,13 +167,15 @@ public class GlobalExceptionHandler {
             HttpMediaTypeNotSupportedException e, HttpServletRequest req
     ) {
         return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
-                .body(build(HttpStatus.UNSUPPORTED_MEDIA_TYPE,
-                        "지원하지 않는 Content-Type 입니다. JSON 사용 권장.",
-                        req));
+                .body(build(
+                        HttpStatus.UNSUPPORTED_MEDIA_TYPE,
+                        "지원하지 않는 Content-Type 입니다. JSON 사용을 권장합니다.",
+                        req
+                ));
     }
 
     // ========================================================================
-    // 5) OnboardingException (OnboardingErrorCode 사용)
+    // 5) OnboardingException (Onboarding 전용)
     // ========================================================================
     @ExceptionHandler(OnboardingException.class)
     public ResponseEntity<ErrorResponse> handleOnboardingException(
@@ -168,7 +195,7 @@ public class GlobalExceptionHandler {
     }
 
     // ========================================================================
-    // 6) 기타 예상 못한 오류
+    // 6) 기타 예상 못한 오류 (진짜 500)
     // ========================================================================
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception e, HttpServletRequest req) {
