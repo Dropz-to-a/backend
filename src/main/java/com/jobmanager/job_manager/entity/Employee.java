@@ -26,6 +26,10 @@ public class Employee {
     @Column(name = "employee_id", nullable = false)
     private Long employeeId;
 
+    /** 부서(team) ID (NULL 가능) */
+    @Column(name = "team_id")
+    private Long teamId;
+
     /** 직원이 회사에 소속된 날짜 */
     @Column(name = "joined_at", nullable = false)
     private LocalDateTime joinedAt;

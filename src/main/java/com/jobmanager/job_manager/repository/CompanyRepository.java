@@ -8,8 +8,12 @@ import java.util.Optional;
 public interface CompanyRepository extends JpaRepository<Company, Long> {
 
     /**
-     * accountId 기준 회사 조회
-     * - 회사 계정은 accounts 테이블과 1:1 관계
+     * 회사 온보딩 여부 확인 (accountId 기준)
      */
     Optional<Company> findByAccountId(Long accountId);
+
+    /**
+     * 회사 온보딩 여부 존재 체크
+     */
+    boolean existsByAccountId(Long accountId);
 }
