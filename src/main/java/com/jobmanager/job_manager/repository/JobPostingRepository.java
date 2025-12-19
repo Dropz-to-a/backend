@@ -26,4 +26,6 @@ public interface JobPostingRepository extends JpaRepository<JobPosting, Long> {
             Long id,
             Long companyId
     );
+
+    List<JobPosting> findByStatusOrderByPublishedAtDesc(JobPostingStatus status);
 }

@@ -3,6 +3,7 @@ package com.jobmanager.job_manager.controller;
 import com.jobmanager.job_manager.dto.jobposting.JobPostingCreateRequest;
 import com.jobmanager.job_manager.dto.jobposting.JobPostingHistoryResponse;
 import com.jobmanager.job_manager.dto.jobposting.JobPostingManageResponse;
+import com.jobmanager.job_manager.dto.jobposting.JobPostingUpdateRequest;
 import com.jobmanager.job_manager.global.jwt.SimpleUserPrincipal;
 import com.jobmanager.job_manager.service.JobPostingService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -17,7 +18,7 @@ import java.util.List;
 
 @Tag(
         name = "회사 채용 공고 관리",
-        description = "회사 계정이 채용 공고를 등록·조회·삭제(마감)하는 API"
+        description = "회사 계정이 본인 공고를 등록, 조회, 수정, 마감하는 API"
 )
 @RestController
 @RequestMapping("/api/company/job-postings")
@@ -29,12 +30,7 @@ public class JobPostingController {
 
     @Operation(
             summary = "채용 공고 등록",
-            description = """
-                    새로운 채용 공고를 등록합니다.
-
-                    - 회사 계정만 등록할 수 있습니다.
-                    - 등록 즉시 모집 중(OPEN) 상태가 됩니다.
-                    """
+            description = "회사가 새로운 채용 공고를 등록합니다."
     )
     @PostMapping
     public ResponseEntity<Void> createPosting(
@@ -50,12 +46,7 @@ public class JobPostingController {
 
     @Operation(
             summary = "내 공고 목록 조회",
-            description = """
-                    회사가 등록한 채용 공고 목록을 조회합니다.
-
-                    - 모집 중(OPEN), 마감(CLOSED) 공고를 모두 조회합니다.
-                    - 각 공고별 지원자 수가 포함됩니다.
-                    """
+            description = "회사 계정이 본인이 등록한 공고 목록을 조회합니다."
     )
     @GetMapping
     public ResponseEntity<List<JobPostingManageResponse>> getMyPostings(
@@ -70,12 +61,7 @@ public class JobPostingController {
 
     @Operation(
             summary = "공고 기록 조회",
-            description = """
-                    회사가 과거에 등록했던 채용 공고 기록을 조회합니다.
-
-                    - 마감된(CLOSED) 공고만 조회됩니다.
-                    - 최신 마감 순으로 정렬됩니다.
-                    """
+            description = "회사가 과거에 등록한 마감된 공고를 조회합니다."
     )
     @GetMapping("/history")
     public ResponseEntity<List<JobPostingHistoryResponse>> getHistory(
@@ -89,14 +75,26 @@ public class JobPostingController {
     }
 
     @Operation(
-            summary = "채용 공고 삭제",
-            description = """
-                    채용 공고를 삭제 처리합니다.
+            summary = "채용 공고 수정",
+            description = "회사가 본인 공고의 내용을 수정합니다. (마감된 공고는 수정 불가)"
+    )
+    @PatchMapping("/{postingId}")
+    public ResponseEntity<Void> updatePosting(
+            @PathVariable Long postingId,
+            @AuthenticationPrincipal SimpleUserPrincipal principal,
+            @RequestBody JobPostingUpdateRequest request
+    ) {
+        jobPostingService.updatePosting(
+                postingId,
+                principal.getAccountId(),
+                request
+        );
+        return ResponseEntity.ok().build();
+    }
 
-                    - 실제 DB 삭제는 수행하지 않습니다.
-                    - 공고 상태를 CLOSED 로 변경하여 기록을 유지합니다.
-                    - 지원자가 존재하면 삭제할 수 없습니다.
-                    """
+    @Operation(
+            summary = "채용 공고 마감",
+            description = "회사가 본인 공고를 마감 처리합니다. (실제 삭제는 아님)"
     )
     @PatchMapping("/{postingId}/close")
     public ResponseEntity<Void> closePosting(
