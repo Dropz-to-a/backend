@@ -18,20 +18,50 @@ public class Company {
     @Column(name = "account_id")
     private Long accountId;
 
+    /* ===== 필수 기본 정보 ===== */
+
     @Column(name = "company_name", nullable = false)
     private String companyName;
 
-    @Column(nullable = false)
+    @Column(name = "business_number", nullable = false, length = 20)
+    private String businessNumber;
+
+    @Column(name = "zonecode", nullable = false, length = 10)
     private String zonecode;
 
-    @Column(nullable = false)
+    @Column(name = "address", nullable = false)
     private String address;
 
     @Column(name = "detail_address", nullable = false)
     private String detailAddress;
 
-    @Column(name = "business_number", nullable = false)
-    private String businessNumber;
+    /* ===== 선택 정보 ===== */
+
+    @Column(name = "founded_year")
+    private Integer foundedYear;
+
+    @Column(name = "employee_count")
+    private Integer employeeCount;
+
+    @Column(name = "industry", length = 100)
+    private String industry;
+
+    @Column(name = "website")
+    private String website;
+
+    @Lob
+    @Column(name = "description")
+    private String description;
+
+    @Lob
+    @Column(name = "company_values")
+    private String companyValues;
+
+    @Lob
+    @Column(name = "mission")
+    private String mission;
+
+    /* ===== 타임스탬프 ===== */
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
