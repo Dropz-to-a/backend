@@ -5,6 +5,7 @@ import com.jobmanager.job_manager.entity.*;
 import com.jobmanager.job_manager.global.exception.exceptions.BusinessException;
 import com.jobmanager.job_manager.global.exception.errorcodes.AuthErrorCode;
 import com.jobmanager.job_manager.global.jwt.JwtTokenProvider;
+import com.jobmanager.job_manager.global.jwt.TokenHashUtils;
 import com.jobmanager.job_manager.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -26,7 +28,9 @@ public class AuthService {
     private final UserFormRepository userFormRepository;
     private final CompanyRepository companyRepository;
     private final EmployeeRepository employeeRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
 
+    // 회원가입
     @Transactional
     public void register(RegisterRequest req) {
 
@@ -68,6 +72,8 @@ public class AuthService {
                 .build());
     }
 
+    // 로그인
+    @Transactional
     public String login(String id, String rawPassword) {
 
         Account acc = accountRepo.findByUsername(id)
@@ -91,7 +97,6 @@ public class AuthService {
         String companyName = null;
         String businessNumber = null;
 
-        // USER → 소속 회사명
         if (type == Account.AccountType.USER) {
             companyName = employeeRepository.findByEmployeeId(acc.getId())
                     .flatMap(emp -> companyRepository.findById(emp.getCompanyId()))
@@ -99,14 +104,14 @@ public class AuthService {
                     .orElse(null);
         }
 
-        // COMPANY → 사업자번호
         if (type == Account.AccountType.COMPANY) {
             businessNumber = companyRepository.findById(acc.getId())
                     .map(Company::getBusinessNumber)
                     .orElse(null);
         }
 
-        return jwt.generate(
+        // AccessToken (30분)
+        String accessToken = jwt.generateLoginToken(
                 acc.getId(),
                 acc.getUsername(),
                 type.name(),
@@ -115,8 +120,57 @@ public class AuthService {
                 companyName,
                 businessNumber
         );
+
+        // RefreshToken 생성 + DB 저장
+        String refreshRaw = UUID.randomUUID().toString().replace("-", "");
+        String refreshHash = TokenHashUtils.sha256(refreshRaw);
+
+        refreshTokenRepository.save(
+                RefreshToken.builder()
+                        .accountId(acc.getId())
+                        .tokenHash(refreshHash)
+                        .expiresAt(LocalDateTime.now().plusDays(1))
+                        .createdAt(LocalDateTime.now())
+                        .build()
+        );
+
+        // accessToken만 반환
+        return accessToken;
     }
 
+    // refresh
+    @Transactional(readOnly = true)
+    public String refresh(String refreshTokenRaw) {
+
+        String hash = TokenHashUtils.sha256(refreshTokenRaw);
+
+        RefreshToken rt = refreshTokenRepository
+                .findByTokenHashAndRevokedAtIsNull(hash)
+                .orElseThrow(() -> new BusinessException(AuthErrorCode.UNAUTHORIZED));
+
+        if (rt.getExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new BusinessException(AuthErrorCode.UNAUTHORIZED);
+        }
+
+        Account acc = accountRepo.findById(rt.getAccountId())
+                .orElseThrow(() -> new BusinessException(AuthErrorCode.ACCOUNT_NOT_FOUND));
+
+        String roleCode = arRepo.findTopRoleCodeByAccountId(acc.getId())
+                .orElse("ROLE_USER");
+
+        // AccessToken (1일)
+        return jwt.generateRefreshToken(
+                acc.getId(),
+                acc.getUsername(),
+                acc.getAccountType().name(),
+                roleCode,
+                true,
+                null,
+                null
+        );
+    }
+
+    // 내부 메서드
     private String defaultRoleIfBlank(String roleCode) {
         return (roleCode == null || roleCode.isBlank()) ? "ROLE_USER" : roleCode;
     }
