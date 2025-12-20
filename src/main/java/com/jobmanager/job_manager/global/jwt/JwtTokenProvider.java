@@ -16,6 +16,9 @@ public class JwtTokenProvider {
     private final Key key;
     private final long expirationMs;
 
+    private static final long ACCESS_30_MIN = 30 * 60 * 1000L;
+    private static final long ACCESS_1_DAY  = 24 * 60 * 60 * 1000L;
+
     public JwtTokenProvider(
             @Value("${jwt.secret}") String secretKey,
             @Value("${jwt.expiration-ms}") long expirationMs
@@ -24,8 +27,7 @@ public class JwtTokenProvider {
         this.expirationMs = expirationMs;
     }
 
-    /** JWT 생성 */
-    public String generate(
+    public String generateLoginToken(
             Long accountId,
             String username,
             String accountType,
@@ -34,9 +36,41 @@ public class JwtTokenProvider {
             String companyName,
             String businessNumber
     ) {
+        return generateWithExpiration(
+                accountId, username, accountType, roleCode,
+                onboarded, companyName, businessNumber,
+                ACCESS_30_MIN
+        );
+    }
 
+    public String generateRefreshToken(
+            Long accountId,
+            String username,
+            String accountType,
+            String roleCode,
+            boolean onboarded,
+            String companyName,
+            String businessNumber
+    ) {
+        return generateWithExpiration(
+                accountId, username, accountType, roleCode,
+                onboarded, companyName, businessNumber,
+                ACCESS_1_DAY
+        );
+    }
+
+    private String generateWithExpiration(
+            Long accountId,
+            String username,
+            String accountType,
+            String roleCode,
+            boolean onboarded,
+            String companyName,
+            String businessNumber,
+            long customExpirationMs
+    ) {
         Date now = new Date();
-        Date expiry = new Date(now.getTime() + expirationMs);
+        Date expiry = new Date(now.getTime() + customExpirationMs);
 
         var builder = Jwts.builder()
                 .setSubject(String.valueOf(accountId))
@@ -47,19 +81,12 @@ public class JwtTokenProvider {
                 .setIssuedAt(now)
                 .setExpiration(expiry);
 
-        // USER 전용
-        if (companyName != null) {
-            builder.claim("companyName", companyName);
-        }
-
-        // COMPANY 전용
+        if (companyName != null) builder.claim("companyName", companyName);
         if ("COMPANY".equals(accountType) && businessNumber != null) {
             builder.claim("businessNumber", businessNumber);
         }
 
-        return builder
-                .signWith(key, SignatureAlgorithm.HS256)
-                .compact();
+        return builder.signWith(key, SignatureAlgorithm.HS256).compact();
     }
 
     public Claims parse(String token) {
@@ -88,13 +115,5 @@ public class JwtTokenProvider {
 
     public Boolean isOnboarded(String token) {
         return parse(token).get("onboarded", Boolean.class);
-    }
-
-    public String getCompanyName(String token) {
-        return parse(token).get("companyName", String.class);
-    }
-
-    public String getBusinessNumber(String token) {
-        return parse(token).get("businessNumber", String.class);
     }
 }
