@@ -51,6 +51,8 @@ public class SecurityConfig {
 
                         .requestMatchers("/api/auth/**").permitAll()
 
+                        .requestMatchers(HttpMethod.GET, "/api/job-postings/**").permitAll()
+
                         .anyRequest().authenticated()
                 )
 
