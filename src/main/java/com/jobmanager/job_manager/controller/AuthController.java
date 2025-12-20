@@ -8,12 +8,12 @@ import com.jobmanager.job_manager.global.jwt.JwtHeaderUtils;
 import com.jobmanager.job_manager.global.jwt.JwtTokenProvider;
 import com.jobmanager.job_manager.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -115,9 +115,33 @@ public class AuthController {
             )
     )
     @PostMapping("/login")
-    public AuthResponse login(@RequestBody LoginRequest req) {
-        String token = authService.login(req.getId(), req.getPassword());
-        return new AuthResponse(token);
+    public AuthResponse login(
+            @RequestBody LoginRequest req,
+            HttpServletResponse response
+    ) {
+        // accessToken 발급 + refreshToken DB 저장
+        AuthService.LoginResult result =
+                authService.loginWithRefresh(req.getId(), req.getPassword());
+
+        // refreshToken → HttpOnly Cookie
+        response.addHeader(
+                "Set-Cookie",
+                "refreshToken=" + result.refreshToken()
+                        + "; HttpOnly; Path=/api/auth/refresh; Max-Age=86400"
+        );
+
+        return new AuthResponse(result.accessToken());
+    }
+
+    // ============================================================
+    // 토큰 재발급
+    // ============================================================
+    @PostMapping("/refresh")
+    public AuthResponse refresh(
+            @CookieValue("refreshToken") String refreshToken
+    ) {
+        String newAccessToken = authService.refresh(refreshToken);
+        return new AuthResponse(newAccessToken);
     }
 
     // ============================================================
