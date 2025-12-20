@@ -30,7 +30,7 @@ public class AuthService {
     private final EmployeeRepository employeeRepository;
     private final RefreshTokenRepository refreshTokenRepository;
 
-    // 회원가입
+    // 회원가입 (기존 그대로)
     @Transactional
     public void register(RegisterRequest req) {
 
@@ -72,9 +72,9 @@ public class AuthService {
                 .build());
     }
 
-    // 로그인
+    // 로그인 + RefreshToken 발급
     @Transactional
-    public String login(String id, String rawPassword) {
+    public LoginResult loginWithRefresh(String id, String rawPassword) {
 
         Account acc = accountRepo.findByUsername(id)
                 .or(() -> accountRepo.findByEmail(id))
@@ -121,7 +121,7 @@ public class AuthService {
                 businessNumber
         );
 
-        // RefreshToken 생성 + DB 저장
+        // RefreshToken 생성
         String refreshRaw = UUID.randomUUID().toString().replace("-", "");
         String refreshHash = TokenHashUtils.sha256(refreshRaw);
 
@@ -134,11 +134,10 @@ public class AuthService {
                         .build()
         );
 
-        // accessToken만 반환
-        return accessToken;
+        return new LoginResult(accessToken, refreshRaw);
     }
 
-    // refresh
+    // 토큰 재발급
     @Transactional(readOnly = true)
     public String refresh(String refreshTokenRaw) {
 
@@ -149,7 +148,7 @@ public class AuthService {
                 .orElseThrow(() -> new BusinessException(AuthErrorCode.UNAUTHORIZED));
 
         if (rt.getExpiresAt().isBefore(LocalDateTime.now())) {
-            throw new BusinessException(AuthErrorCode.UNAUTHORIZED);
+            throw new BusinessException(AuthErrorCode.TOKEN_EXPIRED);
         }
 
         Account acc = accountRepo.findById(rt.getAccountId())
@@ -158,7 +157,6 @@ public class AuthService {
         String roleCode = arRepo.findTopRoleCodeByAccountId(acc.getId())
                 .orElse("ROLE_USER");
 
-        // AccessToken (1일)
         return jwt.generateRefreshToken(
                 acc.getId(),
                 acc.getUsername(),
@@ -170,7 +168,7 @@ public class AuthService {
         );
     }
 
-    // 내부 메서드
+    // 내부 헬퍼
     private String defaultRoleIfBlank(String roleCode) {
         return (roleCode == null || roleCode.isBlank()) ? "ROLE_USER" : roleCode;
     }
@@ -203,4 +201,7 @@ public class AuthService {
             case ADMIN -> true;
         };
     }
+
+    // 컨트롤러 전용 반환 타입
+    public record LoginResult(String accessToken, String refreshToken) {}
 }
