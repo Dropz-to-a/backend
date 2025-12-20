@@ -119,11 +119,9 @@ public class AuthController {
             @RequestBody LoginRequest req,
             HttpServletResponse response
     ) {
-        // accessToken 발급 + refreshToken DB 저장
         AuthService.LoginResult result =
                 authService.loginWithRefresh(req.getId(), req.getPassword());
 
-        // refreshToken → HttpOnly Cookie
         response.addHeader(
                 "Set-Cookie",
                 "refreshToken=" + result.refreshToken()
@@ -136,6 +134,37 @@ public class AuthController {
     // ============================================================
     // 토큰 재발급
     // ============================================================
+    @Operation(
+            summary = "Access Token 재발급",
+            description = """
+                만료된 Access Token을 재발급합니다.
+
+                🔐 인증 방식
+                - refreshToken은 **HttpOnly Cookie**로 전달됩니다.
+                - 클라이언트는 refreshToken 값을 직접 전송하지 않습니다.
+                - 브라우저는 자동으로 Cookie를 포함하여 요청합니다.
+
+                ⚠️ 주의사항
+                - refreshToken이 만료되었거나 폐기(revoked)된 경우 재발급에 실패합니다.
+                - 이 경우 다시 로그인해야 합니다.
+
+                📌 요청 Body는 필요하지 않습니다.
+                """
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Access Token 재발급 성공",
+            content = @Content(
+                    schema = @Schema(implementation = AuthResponse.class),
+                    examples = @ExampleObject(
+                            value = """
+                            {
+                              "accessToken": "eyJhbGciOiJIUzI1NiJ9..."
+                            }
+                            """
+                    )
+            )
+    )
     @PostMapping("/refresh")
     public AuthResponse refresh(
             @CookieValue("refreshToken") String refreshToken
