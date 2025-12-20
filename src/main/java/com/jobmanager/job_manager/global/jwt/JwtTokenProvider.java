@@ -14,7 +14,7 @@ import java.util.Date;
 public class JwtTokenProvider {
 
     private final Key key;
-    private final long expirationMs;
+    private final long expirationMs; // yml 유지용 (실제 사용 안 함)
 
     private static final long ACCESS_30_MIN = 30 * 60 * 1000L;
     private static final long ACCESS_1_DAY  = 24 * 60 * 60 * 1000L;
@@ -27,6 +27,7 @@ public class JwtTokenProvider {
         this.expirationMs = expirationMs;
     }
 
+    /** 로그인 시 AccessToken (30분) */
     public String generateLoginToken(
             Long accountId,
             String username,
@@ -43,6 +44,7 @@ public class JwtTokenProvider {
         );
     }
 
+    /** Refresh 후 AccessToken (1일) */
     public String generateRefreshToken(
             Long accountId,
             String username,
