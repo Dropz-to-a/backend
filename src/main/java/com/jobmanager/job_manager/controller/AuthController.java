@@ -139,16 +139,16 @@ public class AuthController {
             description = """
                 만료된 Access Token을 재발급합니다.
 
-                🔐 인증 방식
+                  인증 방식
                 - refreshToken은 **HttpOnly Cookie**로 전달됩니다.
                 - 클라이언트는 refreshToken 값을 직접 전송하지 않습니다.
                 - 브라우저는 자동으로 Cookie를 포함하여 요청합니다.
 
-                ⚠️ 주의사항
+                  주의사항
                 - refreshToken이 만료되었거나 폐기(revoked)된 경우 재발급에 실패합니다.
                 - 이 경우 다시 로그인해야 합니다.
 
-                📌 요청 Body는 필요하지 않습니다.
+                  요청 Body는 필요하지 않습니다.
                 """
     )
     @ApiResponse(
