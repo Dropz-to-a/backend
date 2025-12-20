@@ -1,9 +1,6 @@
 package com.jobmanager.job_manager.controller;
 
-import com.jobmanager.job_manager.dto.auth.AuthResponse;
-import com.jobmanager.job_manager.dto.auth.LoginRequest;
-import com.jobmanager.job_manager.dto.auth.MeResponse;
-import com.jobmanager.job_manager.dto.auth.RegisterRequest;
+import com.jobmanager.job_manager.dto.auth.*;
 import com.jobmanager.job_manager.global.jwt.JwtHeaderUtils;
 import com.jobmanager.job_manager.global.jwt.JwtTokenProvider;
 import com.jobmanager.job_manager.service.AuthService;
@@ -20,9 +17,10 @@ import org.springframework.web.bind.annotation.*;
 @Tag(
         name = "Auth",
         description = """
-            회원가입 / 로그인 / 내 정보 조회 API입니다.
-            - JWT 기반 인증을 사용합니다.
-            - ROLE_USER / ROLE_COMPANY / ROLE_ADMIN 권한을 사용합니다.
+            회원가입 / 로그인 / 토큰 재발급 / 내 정보 조회 API
+            - JWT 기반 인증
+            - AccessToken: 30분
+            - RefreshToken: 1일 (HttpOnly Cookie)
             """
 )
 @RestController
@@ -51,24 +49,7 @@ public class AuthController {
                 - password : 비밀번호
                 - phone : 전화번호
                 - roleCode : 권한 코드
-                """,
-            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    required = true,
-                    content = @Content(
-                            schema = @Schema(implementation = RegisterRequest.class),
-                            examples = @ExampleObject(
-                                    value = """
-                                    {
-                                      "username": "dropz_company",
-                                      "email": "hr@dropz.co.kr",
-                                      "password": "1234",
-                                      "phone": "01012341234",
-                                      "roleCode": "ROLE_COMPANY"
-                                    }
-                                    """
-                            )
-                    )
-            )
+                """
     )
     @ApiResponse(responseCode = "200", description = "회원가입 성공")
     @PostMapping("/register")
@@ -78,26 +59,16 @@ public class AuthController {
     }
 
     // ============================================================
-    // 로그인 (JSON)
+    // 로그인
     // ============================================================
     @Operation(
             summary = "로그인",
             description = """
                 username 또는 email + password로 로그인합니다.
-                반드시 JSON 형식으로 요청해야 합니다.
 
-                요청 예시:
-                {
-                  "id": "alvin",
-                  "password": "1234"
-                }
-                
-                JWT Token에 실려 보내지는 값
-                - 유저 이름
-                - 계정 타입(user, company)
-                - 계정 역할(ROLE_USER, ROLE_COMPANY)
-                - onboard 여부(true, false)
-                - 소속된 회사 이름(소속되어있지 않을 경우 출력 X, User만 출력됨)
+                응답:
+                - accessToken : JWT (30분)
+                - refreshToken : HttpOnly Cookie (1일)
                 """
     )
     @ApiResponse(
@@ -115,70 +86,60 @@ public class AuthController {
             )
     )
     @PostMapping("/login")
-    public AuthResponse login(
-            @RequestBody LoginRequest req,
-            HttpServletResponse response
-    ) {
+    public AuthResponse login(@RequestBody LoginRequest req) {
+
         AuthService.LoginResult result =
-                authService.loginWithRefresh(req.getId(), req.getPassword());
+                authService.login(req.getId(), req.getPassword());
 
-        response.addHeader(
-                "Set-Cookie",
-                "refreshToken=" + result.refreshToken()
-                        + "; HttpOnly; Path=/api/auth/refresh; Max-Age=86400"
+        return new AuthResponse(
+                result.accessToken(),
+                result.refreshToken()
         );
-
-        return new AuthResponse(result.accessToken());
     }
 
+
     // ============================================================
-    // 토큰 재발급
+    // Access Token 재발급
     // ============================================================
     @Operation(
             summary = "Access Token 재발급",
             description = """
-                만료된 Access Token을 재발급합니다.
+                RefreshToken을 사용하여 AccessToken을 재발급합니다.
 
-                  인증 방식
-                - refreshToken은 **HttpOnly Cookie**로 전달됩니다.
-                - 클라이언트는 refreshToken 값을 직접 전송하지 않습니다.
-                - 브라우저는 자동으로 Cookie를 포함하여 요청합니다.
-
-                  주의사항
-                - refreshToken이 만료되었거나 폐기(revoked)된 경우 재발급에 실패합니다.
-                - 이 경우 다시 로그인해야 합니다.
-
-                  요청 Body는 필요하지 않습니다.
+                - refreshToken은 HttpOnly Cookie로 전달됩니다.
+                - 요청 Body는 필요하지 않습니다.
+                - RefreshToken이 만료되면 재로그인이 필요합니다.
                 """
     )
     @ApiResponse(
             responseCode = "200",
-            description = "Access Token 재발급 성공",
+            description = "재발급 성공",
             content = @Content(
-                    schema = @Schema(implementation = AuthResponse.class),
-                    examples = @ExampleObject(
-                            value = """
-                            {
-                              "accessToken": "eyJhbGciOiJIUzI1NiJ9..."
-                            }
-                            """
-                    )
+                    schema = @Schema(implementation = AuthResponse.class)
             )
     )
     @PostMapping("/refresh")
-    public AuthResponse refresh(
-            @CookieValue("refreshToken") String refreshToken
-    ) {
-        String newAccessToken = authService.refresh(refreshToken);
-        return new AuthResponse(newAccessToken);
+    public AuthResponse refresh(@RequestBody RefreshRequest req) {
+
+        String newAccessToken =
+                authService.refresh(req.getRefreshToken());
+
+        return new AuthResponse(newAccessToken, null);
     }
 
+
     // ============================================================
-    // 내 계정 정보 조회 (역할 판단용)
+    // 내 계정 정보 조회
     // ============================================================
     @Operation(
             summary = "내 계정 정보 조회",
-            description = "현재 로그인한 사용자의 accountId, username, accountType, role 정보를 반환합니다."
+            description = """
+                현재 로그인한 사용자의 정보를 반환합니다.
+                - accountId
+                - username
+                - accountType
+                - role
+                """
     )
     @ApiResponse(
             responseCode = "200",

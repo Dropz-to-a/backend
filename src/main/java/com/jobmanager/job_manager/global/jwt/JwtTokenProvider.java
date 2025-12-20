@@ -14,82 +14,46 @@ import java.util.Date;
 public class JwtTokenProvider {
 
     private final Key key;
-    private final long expirationMs; // yml 유지용 (실제 사용 안 함)
 
     private static final long ACCESS_30_MIN = 30 * 60 * 1000L;
-    private static final long ACCESS_1_DAY  = 24 * 60 * 60 * 1000L;
 
     public JwtTokenProvider(
-            @Value("${jwt.secret}") String secretKey,
-            @Value("${jwt.expiration-ms}") long expirationMs
+            @Value("${jwt.secret}") String secretKey
     ) {
         this.key = Keys.hmacShaKeyFor(secretKey.getBytes());
-        this.expirationMs = expirationMs;
     }
 
-    /** 로그인 시 AccessToken (30분) */
-    public String generateLoginToken(
+    // ✅ Access Token 발급 ONLY
+    public String generateAccessToken(
             Long accountId,
             String username,
             String accountType,
-            String roleCode,
+            String role,
             boolean onboarded,
             String companyName,
             String businessNumber
-    ) {
-        return generateWithExpiration(
-                accountId, username, accountType, roleCode,
-                onboarded, companyName, businessNumber,
-                ACCESS_30_MIN
-        );
-    }
-
-    /** Refresh 후 AccessToken (1일) */
-    public String generateRefreshToken(
-            Long accountId,
-            String username,
-            String accountType,
-            String roleCode,
-            boolean onboarded,
-            String companyName,
-            String businessNumber
-    ) {
-        return generateWithExpiration(
-                accountId, username, accountType, roleCode,
-                onboarded, companyName, businessNumber,
-                ACCESS_1_DAY
-        );
-    }
-
-    private String generateWithExpiration(
-            Long accountId,
-            String username,
-            String accountType,
-            String roleCode,
-            boolean onboarded,
-            String companyName,
-            String businessNumber,
-            long customExpirationMs
     ) {
         Date now = new Date();
-        Date expiry = new Date(now.getTime() + customExpirationMs);
+        Date expiry = new Date(now.getTime() + ACCESS_30_MIN);
 
         var builder = Jwts.builder()
                 .setSubject(String.valueOf(accountId))
                 .claim("username", username)
                 .claim("type", accountType)
-                .claim("role", roleCode)
+                .claim("role", role)
                 .claim("onboarded", onboarded)
                 .setIssuedAt(now)
                 .setExpiration(expiry);
 
         if (companyName != null) builder.claim("companyName", companyName);
-        if ("COMPANY".equals(accountType) && businessNumber != null) {
-            builder.claim("businessNumber", businessNumber);
-        }
+        if (businessNumber != null) builder.claim("businessNumber", businessNumber);
 
-        return builder.signWith(key, SignatureAlgorithm.HS256).compact();
+        return builder
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
     }
+
+    // ================= 파싱 =================
 
     public Claims parse(String token) {
         return Jwts.parserBuilder()
@@ -113,9 +77,5 @@ public class JwtTokenProvider {
 
     public String getRole(String token) {
         return parse(token).get("role", String.class);
-    }
-
-    public Boolean isOnboarded(String token) {
-        return parse(token).get("onboarded", Boolean.class);
     }
 }
