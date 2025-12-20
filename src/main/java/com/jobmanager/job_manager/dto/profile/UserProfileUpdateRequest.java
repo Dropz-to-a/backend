@@ -4,6 +4,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 public class UserProfileUpdateRequest {
@@ -17,32 +19,23 @@ public class UserProfileUpdateRequest {
     @Schema(description = "전화번호", example = "010-1234-5678")
     private String phone;
 
-    @Schema(description = "키 (숫자 또는 cm 포함)", example = "170cm")
-    private String height;
+    @Schema(
+            description = "보유 자격증 (자유 입력)",
+            example = "[\"정보처리기사\", \"SQLD\"]"
+    )
+    private List<String> license;
 
-    @Schema(description = "몸무게 (숫자 또는 kg 포함)", example = "65kg")
-    private String weight;
-
-    @Schema(description = "혈액형 (A, B, AB, O)", example = "A")
-    private String blood;
-
-    @Schema(description = "학력", example = "대졸")
-    private String education;
-
-    @Schema(description = "병역 사항", example = "군필")
-    private String military;
-
-    @Schema(description = "보유 자격증 (자유 입력)", example = "정보처리기사, SQLD")
-    private String license;
+    @Schema(
+            description = "보유 기술",
+            example = "[\"리액트\", \"스프링\"]"
+    )
+    private List<String> skills;
 
     @Schema(description = "외국어 능력", example = "영어(중급), 일본어(기초)")
     private String foreignLang;
 
     @Schema(description = "대외활동", example = "교내 개발 동아리 활동, 해커톤 참가")
     private String activity;
-
-    @Schema(description = "취미", example = "헬스, 독서")
-    private String hobby;
 
     @Schema(
             description = "지원 동기 / 자기소개",

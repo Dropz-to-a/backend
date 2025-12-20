@@ -1,8 +1,12 @@
 package com.jobmanager.job_manager.dto.profile;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jobmanager.job_manager.entity.UserForm;
 import lombok.Builder;
 import lombok.Getter;
+
+import java.util.List;
 
 @Getter
 @Builder
@@ -16,18 +20,13 @@ public class UserProfileResponse {
     private String address;
     private String detailAddress;
     private String zonecode;
-
-    private String height;
-    private String weight;
-    private String blood;
-    private String education;
-    private String military;
-    private String license;
+    private List<String> skills;
+    private List<String> license;
     private String foreignLang;
     private String activity;
-    private String family;
-    private String hobby;
     private String motivation;
+
+    private static final ObjectMapper om = new ObjectMapper();
 
     public static UserProfileResponse from(UserForm f) {
         return UserProfileResponse.builder()
@@ -39,16 +38,20 @@ public class UserProfileResponse {
                 .address(f.getAddress())
                 .detailAddress(f.getDetailAddress())
                 .zonecode(f.getZonecode())
-                .height(f.getHeight())
-                .weight(f.getWeight())
-                .blood(f.getBlood())
-                .education(f.getEducation())
-                .military(f.getMilitary())
-                .license(f.getLicense())
+                .skills(readList(f.getSkills()))
+                .license(readList(f.getLicense()))
                 .foreignLang(f.getForeignLang())
                 .activity(f.getActivity())
-                .hobby(f.getHobby())
                 .motivation(f.getMotivation())
                 .build();
+    }
+
+    private static List<String> readList(String json) {
+        if (json == null || json.isBlank()) return List.of();
+        try {
+            return om.readValue(json, new TypeReference<List<String>>() {});
+        } catch (Exception e) {
+            return List.of();
+        }
     }
 }

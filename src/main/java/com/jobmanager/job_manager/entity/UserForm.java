@@ -6,6 +6,7 @@ import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "user_form")
@@ -20,9 +21,6 @@ public class UserForm {
     @Column(name = "account_id")
     private Long accountId;
 
-    // @MapsId 및 연관관계 제거 (필수)
-    // Hibernate merge 충돌을 유발하므로 삭제
-
     @Column(name = "name", nullable = false)
     private String name;
 
@@ -31,6 +29,9 @@ public class UserForm {
 
     @Column(name = "zonecode", nullable = false)
     private String zonecode;
+
+    @Column(name = "skills", columnDefinition = "TEXT")
+    private String skills;
 
     @Column(name = "address")
     private String address;
@@ -44,21 +45,6 @@ public class UserForm {
     @Column(name = "phone")
     private String phone;
 
-    @Column(name = "height")
-    private String height;
-
-    @Column(name = "weight")
-    private String weight;
-
-    @Column(name = "blood")
-    private String blood;
-
-    @Column(name = "education")
-    private String education;
-
-    @Column(name = "military")
-    private String military;
-
     @Column(name = "license", columnDefinition = "TEXT")
     private String license;
 
@@ -67,9 +53,6 @@ public class UserForm {
 
     @Column(name = "activity", columnDefinition = "TEXT")
     private String activity;
-
-    @Column(name = "hobby")
-    private String hobby;
 
     @Column(name = "motivation", columnDefinition = "TEXT")
     private String motivation;
