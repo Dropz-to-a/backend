@@ -1,5 +1,6 @@
 package com.jobmanager.job_manager.controller;
 
+import com.jobmanager.job_manager.dto.profile.UserProfileQueryRequest;
 import com.jobmanager.job_manager.dto.profile.UserProfileResponse;
 import com.jobmanager.job_manager.dto.profile.UserProfileUpdateRequest;
 import com.jobmanager.job_manager.entity.UserFamily;
@@ -89,5 +90,13 @@ public class UserProfileController {
     ) {
         SimpleUserPrincipal principal = getUser(authentication);
         userFamilyService.deleteFamily(principal.getAccountId(), familyId);
+    }
+
+    @PostMapping("/public")
+    @Operation(summary = "유저 공개 프로필 조회")
+    public UserProfileResponse getPublicUserProfile(
+            @RequestBody UserProfileQueryRequest req
+    ) {
+        return userProfileService.getPublicProfile(req.getAccountId());
     }
 }

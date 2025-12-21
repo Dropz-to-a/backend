@@ -1,6 +1,7 @@
 // src/main/java/com/jobmanager/job_manager/controller/CompanyProfileController.java
 package com.jobmanager.job_manager.controller;
 
+import com.jobmanager.job_manager.dto.company.CompanyProfileQueryRequest;
 import com.jobmanager.job_manager.dto.company.CompanyProfileResponse;
 import com.jobmanager.job_manager.dto.company.CompanyProfileUpdateRequest;
 import com.jobmanager.job_manager.global.jwt.JwtHeaderUtils;
@@ -38,4 +39,13 @@ public class CompanyProfileController {
     ) {
         return service.updateMyProfile(currentCompanyId(), req);
     }
+
+    @PostMapping("/public")
+    @Operation(summary = "회사 공개 프로필 조회")
+    public CompanyProfileResponse getPublicCompanyProfile(
+            @RequestBody CompanyProfileQueryRequest req
+    ) {
+        return service.getPublicProfile(req.getAccountId());
+    }
+
 }

@@ -101,4 +101,16 @@ public class UserProfileService {
             return List.of();
         }
     }
+
+    /** 공개 프로필 조회 (USER) */
+    @Transactional(readOnly = true)
+    public UserProfileResponse getPublicProfile(Long accountId) {
+
+        UserForm form = userFormRepository.findById(accountId)
+                .orElseThrow(() ->
+                        new ProfileException(ProfileErrorCode.PROFILE_NOT_ONBOARDED)
+                );
+
+        return UserProfileResponse.from(form);
+    }
 }

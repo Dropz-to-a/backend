@@ -50,13 +50,25 @@ public class SecurityConfig {
                         ).permitAll()
 
                         .requestMatchers("/error").permitAll()
-
                         .requestMatchers("/api/auth/**").permitAll()
-
                         .requestMatchers(HttpMethod.GET, "/api/job-postings/**").permitAll()
 
-                        .requestMatchers("/api/company/**").hasRole("COMPANY")
+                        // =========================
+                        // 공개 프로필 (USER, COMPANY 모두 허용)
+                        // =========================
+                        .requestMatchers("/api/profile/public").authenticated()
+                        .requestMatchers("/api/company/profile/public").authenticated()
 
+                        // =========================
+                        // 내 프로필
+                        // =========================
+                        .requestMatchers("/api/profile/me/**").hasRole("USER")
+                        .requestMatchers("/api/company/profile/me").hasRole("COMPANY")
+                        .requestMatchers("/api/company/profile/me/**").hasRole("COMPANY")
+
+                        // =========================
+                        // 기타 USER 전용
+                        // =========================
                         .requestMatchers("/api/applications/**").hasRole("USER")
 
                         .anyRequest().authenticated()

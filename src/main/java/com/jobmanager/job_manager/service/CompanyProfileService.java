@@ -59,4 +59,14 @@ public class CompanyProfileService {
     private String normalizeBizNo(String raw) {
         return raw == null ? null : raw.replaceAll("[^0-9]", "");
     }
+
+    /** 공개 프로필 조회 (COMPANY) */
+    @Transactional(readOnly = true)
+    public CompanyProfileResponse getPublicProfile(Long accountId) {
+
+        Company company = companyRepository.findById(accountId)
+                .orElseThrow(() -> new IllegalArgumentException("회사 프로필이 존재하지 않습니다."));
+
+        return CompanyProfileResponse.from(company);
+    }
 }
