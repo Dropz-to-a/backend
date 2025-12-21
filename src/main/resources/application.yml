@@ -4,11 +4,13 @@ server:
 spring:
   application:
     name: job-manager
+
   datasource:
     url: jdbc:mysql://mysql-1bd69c46-capstone2.g.aivencloud.com:25590/job_manager?ssl-mode=REQUIRED
     username: avnadmin
     password: AVNS_Ozi4pud2pUgpPbOzJ9V
     driver-class-name: com.mysql.cj.jdbc.Driver
+
   jpa:
     hibernate:
       ddl-auto: none
@@ -17,7 +19,7 @@ spring:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.MySQLDialect
-      show_sql: true
+        show_sql: true
 
 logging:
   level:
@@ -39,7 +41,7 @@ jwt:
   expiration-ms: 3600000
 
 toss:
-  base-url: https://api.tosspayments.com/v1
+  base-url: https://api.tosspayments.com
   secret-key: ${TOSS_SECRET_KEY:}
 
 payments:
