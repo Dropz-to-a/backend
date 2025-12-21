@@ -10,7 +10,8 @@ import org.springframework.stereotype.Component;
 @Component
 @ConfigurationProperties(prefix = "toss")
 public class TossProperties {
-
-    private String secretKey; // 시크릿키
-    private String baseUrl;   // https://api.tosspayments.com
+    private String secretKey;   // 토스 시크릿키
+    private String baseUrl;     // https://api.tosspayments.com
+    private String successUrl;  // 예: https://localhost:5173/pay/success
+    private String failUrl;     // 예: https://localhost:5173/pay/fail
 }

@@ -36,7 +36,7 @@ public class PaymentOrder {
     private Long contractId;
 
     /** 결제 금액 */
-    @Column(nullable = false)
+    @Column(nullable = false, precision = 15, scale = 2)
     private BigDecimal amount;
 
     /** 통화 (KRW 기본) */
@@ -57,50 +57,38 @@ public class PaymentOrder {
     @Column(name = "toss_payment_key", length = 200)
     private String tossPaymentKey;
 
-    /** 토스에서 받은 원본 응답(json) */
+    /** 토스 응답 원본(json) */
     @Column(name = "toss_raw_response", columnDefinition = "json")
     private String tossRawResponse;
 
-    /** 결제 요청 시간 */
+    /** 주문 생성/요청/승인/취소 시각 */
     @Column(name = "requested_at", nullable = false)
     private LocalDateTime requestedAt;
 
-    /** 결제 완료 시간 */
     @Column(name = "paid_at")
     private LocalDateTime paidAt;
 
-    /** 결제 취소 시간 */
     @Column(name = "cancelled_at")
     private LocalDateTime cancelledAt;
 
-    /** 생성 시각 */
+    /** 생성/수정 */
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    /** 수정 시각 (자동 업데이트) */
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    /** 엔티티 저장 전 자동 날짜 세팅 */
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
-        if (this.requestedAt == null) {
-            this.requestedAt = LocalDateTime.now();
-        }
-        if (this.status == null) {
-            this.status = PaymentOrderStatus.REQUESTED;
-        }
-        if (this.currency == null) {
-            this.currency = "KRW";
-        }
-        if (this.method == null) {
-            this.method = PaymentMethod.CARD;
-        }
+
+        if (this.requestedAt == null) this.requestedAt = LocalDateTime.now();
+        if (this.status == null) this.status = PaymentOrderStatus.READY;
+        if (this.currency == null) this.currency = "KRW";
+        if (this.method == null) this.method = PaymentMethod.CARD;
     }
 
-    /** 엔티티 업데이트 시 자동 날짜 갱신 */
     @PreUpdate
     protected void onUpdate() {
         this.updatedAt = LocalDateTime.now();
