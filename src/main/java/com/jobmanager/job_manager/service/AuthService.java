@@ -24,6 +24,7 @@ public class AuthService {
     private final RoleRepository roleRepository;
     private final AccountRoleRepository accountRoleRepository;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final UserFormRepository userFormRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
 
@@ -97,18 +98,18 @@ public class AuthService {
                 .findTopRoleCodeByAccountId(account.getId())
                 .orElse("ROLE_USER");
 
-        // AccessToken (30분)
+        boolean onboarded = isUserOnboarded(account);
+
         String accessToken = jwtTokenProvider.generateAccessToken(
                 account.getId(),
                 account.getUsername(),
                 account.getAccountType().name(),
                 roleCode,
-                true,
+                onboarded,
                 null,
                 null
         );
 
-        // RefreshToken (UUID + DB, 1일)
         String refreshRaw = UUID.randomUUID().toString().replace("-", "");
         String refreshHash = TokenHashUtils.sha256(refreshRaw);
 
@@ -147,20 +148,40 @@ public class AuthService {
                 .findTopRoleCodeByAccountId(account.getId())
                 .orElse("ROLE_USER");
 
+        boolean onboarded = isUserOnboarded(account);
+
         return jwtTokenProvider.generateAccessToken(
                 account.getId(),
                 account.getUsername(),
                 account.getAccountType().name(),
                 roleCode,
-                true,
+                onboarded,
                 null,
                 null
         );
     }
 
-    // ============================================================
-    // 내부 헬퍼
-    // ============================================================
+    private boolean isUserOnboarded(Account account) {
+
+        if (account.getAccountType() != Account.AccountType.USER) {
+            return true;
+        }
+
+        return userFormRepository.findById(account.getId())
+                .filter(f ->
+                        hasText(f.getName()) &&
+                                f.getBirth() != null &&
+                                hasText(f.getAddress()) &&
+                                hasText(f.getDetailAddress()) &&
+                                hasText(f.getZonecode())
+                )
+                .isPresent();
+    }
+
+    private boolean hasText(String s) {
+        return s != null && !s.isBlank();
+    }
+
     private String defaultRole(String roleCode) {
         return (roleCode == null || roleCode.isBlank())
                 ? "ROLE_USER"
