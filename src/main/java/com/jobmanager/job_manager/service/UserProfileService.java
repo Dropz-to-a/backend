@@ -61,7 +61,9 @@ public class UserProfileService {
             form.setLicense(toJson(req.getLicense()));
         }
 
-        if (req.getForeignLang() != null) form.setForeignLang(req.getForeignLang());
+        if (req.getForeignLang() != null){
+            form.setForeignLang(toJson(req.getForeignLang()));
+        }
         if (req.getActivity() != null) form.setActivity(req.getActivity());
         if (req.getMotivation() != null) form.setMotivation(req.getMotivation());
 

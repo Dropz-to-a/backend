@@ -22,7 +22,7 @@ public class UserProfileResponse {
     private String zonecode;
     private List<String> skills;
     private List<String> license;
-    private String foreignLang;
+    private List<String> foreignLang;
     private String activity;
     private String motivation;
 
@@ -40,7 +40,7 @@ public class UserProfileResponse {
                 .zonecode(f.getZonecode())
                 .skills(readList(f.getSkills()))
                 .license(readList(f.getLicense()))
-                .foreignLang(f.getForeignLang())
+                .foreignLang(readList(f.getForeignLang()))
                 .activity(f.getActivity())
                 .motivation(f.getMotivation())
                 .build();
