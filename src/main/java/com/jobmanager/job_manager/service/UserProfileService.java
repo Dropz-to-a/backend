@@ -1,5 +1,7 @@
 package com.jobmanager.job_manager.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jobmanager.job_manager.dto.profile.UserProfileResponse;
 import com.jobmanager.job_manager.dto.profile.UserProfileUpdateRequest;
 import com.jobmanager.job_manager.entity.UserForm;
@@ -10,12 +12,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class UserProfileService {
 
     private final UserFormRepository userFormRepository;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     /** 내 프로필 조회 */
     @Transactional(readOnly = true)
@@ -35,7 +40,6 @@ public class UserProfileService {
             UserProfileUpdateRequest req
     ) {
 
-        // PATCH 요청이 완전히 비어있는 경우
         if (isEmptyRequest(req)) {
             throw new ProfileException(ProfileErrorCode.PROFILE_UPDATE_EMPTY);
         }
@@ -49,15 +53,18 @@ public class UserProfileService {
         if (req.getEmail() != null) form.setEmail(req.getEmail());
         if (req.getPhone() != null) form.setPhone(req.getPhone());
 
-        if (req.getHeight() != null) form.setHeight(req.getHeight());
-        if (req.getWeight() != null) form.setWeight(req.getWeight());
-        if (req.getBlood() != null) form.setBlood(req.getBlood());
-        if (req.getEducation() != null) form.setEducation(req.getEducation());
-        if (req.getMilitary() != null) form.setMilitary(req.getMilitary());
-        if (req.getLicense() != null) form.setLicense(req.getLicense());
-        if (req.getForeignLang() != null) form.setForeignLang(req.getForeignLang());
+        if (req.getSkills() != null) {
+            form.setSkills(toJson(req.getSkills()));
+        }
+
+        if (req.getLicense() != null) {
+            form.setLicense(toJson(req.getLicense()));
+        }
+
+        if (req.getForeignLang() != null){
+            form.setForeignLang(toJson(req.getForeignLang()));
+        }
         if (req.getActivity() != null) form.setActivity(req.getActivity());
-        if (req.getHobby() != null) form.setHobby(req.getHobby());
         if (req.getMotivation() != null) form.setMotivation(req.getMotivation());
 
         return UserProfileResponse.from(form);
@@ -68,15 +75,30 @@ public class UserProfileService {
         return req.getName() == null
                 && req.getEmail() == null
                 && req.getPhone() == null
-                && req.getHeight() == null
-                && req.getWeight() == null
-                && req.getBlood() == null
-                && req.getEducation() == null
-                && req.getMilitary() == null
+                && req.getSkills() == null
                 && req.getLicense() == null
                 && req.getForeignLang() == null
                 && req.getActivity() == null
-                && req.getHobby() == null
                 && req.getMotivation() == null;
+    }
+
+    /** List → JSON 문자열 변환 */
+    private String toJson(List<String> list) {
+        try {
+            return objectMapper.writeValueAsString(list);
+        } catch (Exception e) {
+            throw new IllegalStateException("List JSON 변환 실패", e);
+        }
+    }
+
+    /** JSON 문자열 → List 변환 (필요 시 확장용) */
+    @SuppressWarnings("unused")
+    private List<String> fromJson(String json) {
+        if (json == null || json.isBlank()) return List.of();
+        try {
+            return objectMapper.readValue(json, new TypeReference<List<String>>() {});
+        } catch (Exception e) {
+            return List.of();
+        }
     }
 }
