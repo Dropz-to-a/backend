@@ -19,27 +19,31 @@ public class PaymentOrder {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /** 토스 주문번호 (UNIQUE) */
+    /** 토스 주문번호 (외부 연동용) */
     @Column(name = "order_id", nullable = false, unique = true, length = 100)
     private String orderId;
+
+    /** 주문명 (결제명) */
+    @Column(name = "order_name", nullable = false, length = 200)
+    private String orderName;
 
     /** 결제 주체 (회사 accounts.id) */
     @Column(name = "company_id", nullable = false)
     private Long companyId;
 
-    /** 결제 대상 (직원 accounts.id) */
+    /** 결제 대상 직원 */
     @Column(name = "employee_id")
     private Long employeeId;
 
-    /** 관련 계약 (contracts.id) */
+    /** 관련 계약 */
     @Column(name = "contract_id")
     private Long contractId;
 
     /** 결제 금액 */
-    @Column(nullable = false, precision = 15, scale = 2)
+    @Column(nullable = false)
     private BigDecimal amount;
 
-    /** 통화 (KRW 기본) */
+    /** 통화 */
     @Column(nullable = false, length = 3)
     private String currency;
 
@@ -54,43 +58,33 @@ public class PaymentOrder {
     private PaymentMethod method;
 
     /** 토스 paymentKey */
-    @Column(name = "toss_payment_key", length = 200)
+    @Column(name = "toss_payment_key")
     private String tossPaymentKey;
 
-    /** 토스 응답 원본(json) */
+    /** 토스 응답 원본 */
     @Column(name = "toss_raw_response", columnDefinition = "json")
     private String tossRawResponse;
 
-    /** 주문 생성/요청/승인/취소 시각 */
-    @Column(name = "requested_at", nullable = false)
+    /** 시간 정보 */
     private LocalDateTime requestedAt;
-
-    @Column(name = "paid_at")
     private LocalDateTime paidAt;
-
-    @Column(name = "cancelled_at")
     private LocalDateTime cancelledAt;
 
-    /** 생성/수정 */
-    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
-
-    @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
     @PrePersist
     protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
-
-        if (this.requestedAt == null) this.requestedAt = LocalDateTime.now();
-        if (this.status == null) this.status = PaymentOrderStatus.READY;
-        if (this.currency == null) this.currency = "KRW";
-        if (this.method == null) this.method = PaymentMethod.CARD;
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+        if (requestedAt == null) requestedAt = LocalDateTime.now();
+        if (currency == null) currency = "KRW";
+        if (method == null) method = PaymentMethod.CARD;
+        if (status == null) status = PaymentOrderStatus.READY;
     }
 
     @PreUpdate
     protected void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
     }
 }
