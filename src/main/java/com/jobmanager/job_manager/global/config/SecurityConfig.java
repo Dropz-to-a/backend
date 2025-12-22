@@ -65,6 +65,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/profile/public").authenticated()
                         .requestMatchers("/api/company/profile/public").authenticated()
 
+                        .requestMatchers("/api/profile/me").hasRole("USER")
                         .requestMatchers("/api/profile/me/**").hasRole("USER")
                         .requestMatchers("/api/company/profile/me").hasRole("COMPANY")
                         .requestMatchers("/api/company/profile/me/**").hasRole("COMPANY")
