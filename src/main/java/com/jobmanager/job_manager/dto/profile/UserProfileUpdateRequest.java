@@ -30,16 +30,13 @@ public class UserProfileUpdateRequest {
             description = "보유 자격증",
             example = "[\"정보처리기사\", \"SQLD\"]"
     )
-    private List<String> license;
+    private List<String> licenses;
 
     @Schema(
             description = "외국어 능력",
             example = "[\"영어(중급)\", \"일본어(기초)\"]"
     )
-    private List<String> foreignLang;
-
-    @Schema(description = "대외활동")
-    private String activity;
+    private List<String> foreignLangs;
 
     @Schema(description = "지원 동기 / 자기소개")
     private String motivation;

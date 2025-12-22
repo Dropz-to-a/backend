@@ -6,7 +6,6 @@ import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Entity
 @Table(name = "user_form")
@@ -45,14 +44,13 @@ public class UserForm {
     @Column(name = "phone")
     private String phone;
 
-    @Column(name = "license", columnDefinition = "TEXT")
-    private String license;
+    /** 자격증 목록 (배열, JSON 문자열 등으로 저장) */
+    @Column(name = "licenses", columnDefinition = "TEXT")
+    private String licenses;
 
-    @Column(name = "foreign_lang", columnDefinition = "TEXT")
-    private String foreignLang;
-
-    @Column(name = "activity", columnDefinition = "TEXT")
-    private String activity;
+    /** 외국어 목록 (배열, JSON 문자열 등으로 저장) */
+    @Column(name = "foreign_langs", columnDefinition = "TEXT")
+    private String foreignLangs;
 
     @Column(name = "motivation", columnDefinition = "TEXT")
     private String motivation;

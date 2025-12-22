@@ -1,12 +1,11 @@
 package com.jobmanager.job_manager.controller;
 
-import com.jobmanager.job_manager.dto.profile.UserProfileQueryRequest;
-import com.jobmanager.job_manager.dto.profile.UserProfileResponse;
-import com.jobmanager.job_manager.dto.profile.UserProfileUpdateRequest;
+import com.jobmanager.job_manager.dto.profile.*;
 import com.jobmanager.job_manager.entity.UserFamily;
 import com.jobmanager.job_manager.global.exception.errorcodes.ProfileErrorCode;
 import com.jobmanager.job_manager.global.exception.exceptions.ProfileException;
 import com.jobmanager.job_manager.global.jwt.SimpleUserPrincipal;
+import com.jobmanager.job_manager.service.UserActivityService;
 import com.jobmanager.job_manager.service.UserFamilyService;
 import com.jobmanager.job_manager.service.UserProfileService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -20,15 +19,16 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/profile")
 @RequiredArgsConstructor
-@Tag(name = "UserProfile", description = "유저 프로필 및 가족 정보 API")
+@Tag(name = "UserProfile", description = "유저 프로필 API")
 public class UserProfileController {
 
     private final UserProfileService userProfileService;
     private final UserFamilyService userFamilyService;
+    private final UserActivityService userActivityService;
 
-    // =========================
-    // 공통: 인증 + USER 체크
-    // =========================
+    /** =========================
+     *  인증 + USER 체크
+     *  ========================= */
     private SimpleUserPrincipal getUser(Authentication authentication) {
         if (authentication == null ||
                 !(authentication.getPrincipal() instanceof SimpleUserPrincipal principal) ||
@@ -39,9 +39,9 @@ public class UserProfileController {
         return principal;
     }
 
-    // =========================
-    // 프로필
-    // =========================
+    /** =========================
+     *  프로필
+     *  ========================= */
 
     @GetMapping("/me")
     @Operation(summary = "내 프로필 조회")
@@ -60,9 +60,17 @@ public class UserProfileController {
         return userProfileService.updateMyProfile(principal.getAccountId(), req);
     }
 
-    // =========================
-    // 가족 정보
-    // =========================
+    @PostMapping("/public")
+    @Operation(summary = "유저 공개 프로필 조회")
+    public UserProfileResponse getPublicUserProfile(
+            @RequestBody UserProfileQueryRequest req
+    ) {
+        return userProfileService.getPublicProfile(req.getAccountId());
+    }
+
+    /** =========================
+     *  가족 정보
+     *  ========================= */
 
     @GetMapping("/me/family")
     @Operation(summary = "내 가족 정보 목록 조회")
@@ -92,11 +100,42 @@ public class UserProfileController {
         userFamilyService.deleteFamily(principal.getAccountId(), familyId);
     }
 
-    @PostMapping("/public")
-    @Operation(summary = "유저 공개 프로필 조회")
-    public UserProfileResponse getPublicUserProfile(
-            @RequestBody UserProfileQueryRequest req
+    // =========================
+    // 활동(경력) 관리
+    // =========================
+
+    @PostMapping("/me/activities")
+    @Operation(summary = "경력 추가")
+    public UserActivityResponse addActivity(
+            Authentication authentication,
+            @RequestBody UserActivityRequest req
     ) {
-        return userProfileService.getPublicProfile(req.getAccountId());
+        SimpleUserPrincipal principal = getUser(authentication);
+        return userActivityService.create(principal.getAccountId(), req);
+    }
+
+    @PatchMapping("/me/activities/{activityId}")
+    @Operation(summary = "경력 수정")
+    public UserActivityResponse updateActivity(
+            Authentication authentication,
+            @PathVariable Long activityId,
+            @RequestBody UserActivityRequest req
+    ) {
+        SimpleUserPrincipal principal = getUser(authentication);
+        return userActivityService.update(
+                principal.getAccountId(),
+                activityId,
+                req
+        );
+    }
+
+    @DeleteMapping("/me/activities/{activityId}")
+    @Operation(summary = "경력 삭제")
+    public void deleteActivity(
+            Authentication authentication,
+            @PathVariable Long activityId
+    ) {
+        SimpleUserPrincipal principal = getUser(authentication);
+        userActivityService.delete(principal.getAccountId(), activityId);
     }
 }

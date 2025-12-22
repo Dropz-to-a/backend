@@ -2,6 +2,7 @@ package com.jobmanager.job_manager.dto.profile;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jobmanager.job_manager.entity.UserActivity;
 import com.jobmanager.job_manager.entity.UserForm;
 import lombok.Builder;
 import lombok.Getter;
@@ -20,15 +21,22 @@ public class UserProfileResponse {
     private String address;
     private String detailAddress;
     private String zonecode;
+
     private List<String> skills;
-    private List<String> license;
-    private List<String> foreignLang;
-    private String activity;
+    private List<String> licenses;
+    private List<String> foreignLangs;
+
+    /** 경력 목록 */
+    private List<UserActivityResponse> activities;
+
     private String motivation;
 
     private static final ObjectMapper om = new ObjectMapper();
 
-    public static UserProfileResponse from(UserForm f) {
+    public static UserProfileResponse from(
+            UserForm f,
+            List<UserActivity> activities
+    ) {
         return UserProfileResponse.builder()
                 .accountId(f.getAccountId())
                 .name(f.getName())
@@ -39,9 +47,13 @@ public class UserProfileResponse {
                 .detailAddress(f.getDetailAddress())
                 .zonecode(f.getZonecode())
                 .skills(readList(f.getSkills()))
-                .license(readList(f.getLicense()))
-                .foreignLang(readList(f.getForeignLang()))
-                .activity(f.getActivity())
+                .licenses(readList(f.getLicenses()))
+                .foreignLangs(readList(f.getForeignLangs()))
+                .activities(
+                        activities.stream()
+                                .map(UserActivityResponse::from)
+                                .toList()
+                )
                 .motivation(f.getMotivation())
                 .build();
     }
