@@ -1,7 +1,10 @@
 package com.jobmanager.job_manager.dto.profile;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -11,6 +14,9 @@ public class UserActivityRequest {
     private String companyName;
     private String description;
 
-    private String startDate; // yyyy-MM-dd
-    private String endDate;   // null 가능
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate startDate;
+
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate endDate; // null 가능
 }

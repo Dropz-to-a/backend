@@ -24,9 +24,8 @@ public class UserActivityService {
      *  ========================= */
     public UserActivityResponse create(Long accountId, UserActivityRequest req) {
 
-        LocalDate startDate = LocalDate.parse(req.getStartDate());
-        LocalDate endDate =
-                req.getEndDate() != null ? LocalDate.parse(req.getEndDate()) : null;
+        LocalDate startDate = req.getStartDate();
+        LocalDate endDate = req.getEndDate();
 
         // 날짜 검증
         if (endDate != null && startDate.isAfter(endDate)) {
@@ -76,10 +75,10 @@ public class UserActivityService {
             activity.setDescription(req.getDescription());
         }
         if (req.getStartDate() != null) {
-            activity.setStartDate(LocalDate.parse(req.getStartDate()));
+            activity.setStartDate(req.getStartDate());
         }
         if (req.getEndDate() != null) {
-            activity.setEndDate(LocalDate.parse(req.getEndDate()));
+            activity.setEndDate(req.getEndDate());
         }
 
         // 수정 후 날짜 검증
