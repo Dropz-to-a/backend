@@ -6,7 +6,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -34,8 +33,8 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
-                // CORS 먼저 적용 (중요)
-                .cors(Customizer.withDefaults())
+                // CORS 명시적 적용 (중요)
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
                 // JWT 방식 → CSRF 끔
                 .csrf(csrf -> csrf.disable())
@@ -46,7 +45,7 @@ public class SecurityConfig {
                 )
 
                 .authorizeHttpRequests(auth -> auth
-                        // Preflight 요청 전부 허용
+                        // Preflight 요청 허용
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
                         // Swagger
@@ -109,7 +108,7 @@ public class SecurityConfig {
     }
 
     // =========================
-    // CORS 설정 (PATCH 포함)
+    // CORS 설정
     // =========================
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
