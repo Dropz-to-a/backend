@@ -62,9 +62,7 @@ public class SecurityConfig {
                         // 공개 채용 공고
                         .requestMatchers(HttpMethod.GET, "/api/job-postings/**").permitAll()
 
-                        // =========================
                         // 프로필
-                        // =========================
                         .requestMatchers("/api/profile/public").authenticated()
                         .requestMatchers("/api/company/profile/public").authenticated()
 
@@ -72,9 +70,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/company/profile/me").hasRole("COMPANY")
                         .requestMatchers("/api/company/profile/me/**").hasRole("COMPANY")
 
-                        // =========================
                         // USER 전용
-                        // =========================
                         .requestMatchers("/api/applications/**").hasRole("USER")
 
                         // 나머지는 인증 필요
@@ -90,17 +86,13 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // =========================
     // Password Encoder
-    // =========================
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    // =========================
     // AuthenticationManager
-    // =========================
     @Bean
     public AuthenticationManager authenticationManager(
             AuthenticationConfiguration configuration
@@ -108,9 +100,7 @@ public class SecurityConfig {
         return configuration.getAuthenticationManager();
     }
 
-    // =========================
-    // CORS 설정 (PATCH 포함)
-    // =========================
+    // CORS 설정
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
 
