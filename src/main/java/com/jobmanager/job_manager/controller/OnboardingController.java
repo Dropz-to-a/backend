@@ -2,6 +2,8 @@
 package com.jobmanager.job_manager.controller;
 
 import com.jobmanager.job_manager.dto.onboarding.*;
+import com.jobmanager.job_manager.dto.bankonboarding.UserBankOnboardingRequest;
+import com.jobmanager.job_manager.dto.bankonboarding.UserBankOnboardingResponse;
 import com.jobmanager.job_manager.global.jwt.SimpleUserPrincipal;
 import com.jobmanager.job_manager.service.OnboardingService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -80,5 +82,22 @@ public class OnboardingController {
         Long accountId = principal.getAccountId();
 
         return onboardingService.onboardCompany(accountId, req);
+    }
+
+    @PostMapping("/user-bank")
+    public UserBankOnboardingResponse userBankOnboarding(
+            Authentication authentication,
+            @RequestBody UserBankOnboardingRequest req
+    ) {
+        SimpleUserPrincipal principal =
+                (SimpleUserPrincipal) authentication.getPrincipal();
+
+        Long accountId = principal.getAccountId();
+
+        if (!"ROLE_USER".equals(principal.getRole())) {
+            throw new IllegalArgumentException("USER 계정만 계좌 온보딩이 가능합니다.");
+        }
+
+        return onboardingService.onboardUserBank(accountId, req);
     }
 }

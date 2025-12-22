@@ -2,6 +2,8 @@
 package com.jobmanager.job_manager.service;
 
 import com.jobmanager.job_manager.dto.onboarding.*;
+import com.jobmanager.job_manager.dto.bankonboarding.UserBankOnboardingRequest;
+import com.jobmanager.job_manager.dto.bankonboarding.UserBankOnboardingResponse;
 import com.jobmanager.job_manager.entity.Account;
 import com.jobmanager.job_manager.entity.Company;
 import com.jobmanager.job_manager.entity.UserForm;
@@ -9,6 +11,7 @@ import com.jobmanager.job_manager.global.exception.errorcodes.OnboardingErrorCod
 import com.jobmanager.job_manager.global.exception.exceptions.OnboardingException;
 import com.jobmanager.job_manager.repository.AccountRepository;
 import com.jobmanager.job_manager.repository.CompanyRepository;
+import com.jobmanager.job_manager.repository.EmployeeRepository;
 import com.jobmanager.job_manager.repository.UserFormRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,6 +27,7 @@ public class OnboardingService {
     private final AccountRepository accountRepository;
     private final UserFormRepository userFormRepository;
     private final CompanyRepository companyRepository;
+    private final EmployeeRepository employeeRepository;
 
     /**
      * USER 온보딩 — 신규 1회만 허용
@@ -129,5 +133,37 @@ public class OnboardingService {
         companyRepository.saveAndFlush(company);
 
         return CompanyOnboardingResponse.from(company);
+    }
+
+    public UserBankOnboardingResponse onboardUserBank(
+            Long accountId,
+            UserBankOnboardingRequest req
+    ) {
+        UserForm form = userFormRepository.findById(accountId)
+                .orElseThrow(() -> new IllegalArgumentException("기본 유저 온보딩이 필요합니다."));
+
+        // 이미 계좌 온보딩 완료
+        if (Boolean.TRUE.equals(form.getBankOnboarded())) {
+            throw new IllegalArgumentException("이미 계좌 온보딩이 완료되었습니다.");
+        }
+
+        // 직원 여부 확인 (어느 회사든 상관없음)
+        boolean employed = employeeRepository.existsByEmployeeId(accountId);
+        if (!employed) {
+            throw new IllegalArgumentException("재직 중인 사용자만 계좌 온보딩이 가능합니다.");
+        }
+
+        form.setBankName(req.getBankName());
+        form.setBankAccountNumber(req.getBankAccountNumber());
+        form.setBankOnboarded(true);
+
+        userFormRepository.save(form);
+
+        return UserBankOnboardingResponse.builder()
+                .accountId(accountId)
+                .bankName(form.getBankName())
+                .bankAccountNumber(form.getBankAccountNumber())
+                .bankOnboarded(true)
+                .build();
     }
 }
