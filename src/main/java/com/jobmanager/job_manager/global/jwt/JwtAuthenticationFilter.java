@@ -1,6 +1,7 @@
 package com.jobmanager.job_manager.global.jwt;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,11 +31,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             FilterChain chain
     ) throws ServletException, IOException {
 
+        // CORS Preflight는 토큰 검사 제외
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            chain.doFilter(request, response);
+            return;
+        }
+
         String header = request.getHeader("Authorization");
 
         if (header != null && header.startsWith("Bearer ")) {
+            String token = header.substring(7);
+
             try {
-                String token = header.substring(7);
                 Claims claims = provider.parse(token);
 
                 SimpleUserPrincipal principal = new SimpleUserPrincipal(
@@ -53,11 +61,37 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                 List.of(() -> principal.getRole())
                         );
 
-                auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                auth.setDetails(
+                        new WebAuthenticationDetailsSource().buildDetails(request)
+                );
+
                 SecurityContextHolder.getContext().setAuthentication(auth);
+
+            } catch (ExpiredJwtException e) {
+                SecurityContextHolder.clearContext();
+
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json;charset=UTF-8");
+                response.getWriter().write("""
+                    {
+                      "code": "ACCESS_TOKEN_EXPIRED",
+                      "message": "Access Token이 만료되었습니다."
+                    }
+                """);
+                return;
 
             } catch (Exception e) {
                 SecurityContextHolder.clearContext();
+
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json;charset=UTF-8");
+                response.getWriter().write("""
+                    {
+                      "code": "INVALID_TOKEN",
+                      "message": "유효하지 않은 JWT 토큰입니다."
+                    }
+                """);
+                return;
             }
         }
 
