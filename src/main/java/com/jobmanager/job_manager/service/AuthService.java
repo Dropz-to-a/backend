@@ -161,8 +161,12 @@ public class AuthService {
         );
     }
 
+    // ============================================================
+    // USER 온보딩 여부 판단 (수정된 부분)
+    // ============================================================
     private boolean isUserOnboarded(Account account) {
 
+        // USER가 아니면 항상 true
         if (account.getAccountType() != Account.AccountType.USER) {
             return true;
         }
@@ -171,9 +175,9 @@ public class AuthService {
                 .filter(f ->
                         hasText(f.getName()) &&
                                 f.getBirth() != null &&
+                                hasText(f.getZonecode()) &&
                                 hasText(f.getAddress()) &&
-                                hasText(f.getDetailAddress()) &&
-                                hasText(f.getZonecode())
+                                hasText(f.getDetailAddress())
                 )
                 .isPresent();
     }
