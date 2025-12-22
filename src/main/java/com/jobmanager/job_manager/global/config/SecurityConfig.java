@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -31,49 +32,56 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
+        http
+                // CORS 먼저 적용 (중요)
+                .cors(Customizer.withDefaults())
+
+                // JWT 방식 → CSRF 끔
                 .csrf(csrf -> csrf.disable())
 
+                // 세션 미사용
                 .sessionManagement(sm ->
                         sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
 
                 .authorizeHttpRequests(auth -> auth
+                        // Preflight 요청 전부 허용
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
+                        // Swagger
                         .requestMatchers(
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html"
                         ).permitAll()
 
-                        .requestMatchers("/error").permitAll()
+                        // 인증 API
                         .requestMatchers("/api/auth/**").permitAll()
+
+                        // 공개 채용 공고
                         .requestMatchers(HttpMethod.GET, "/api/job-postings/**").permitAll()
 
                         // =========================
-                        // 공개 프로필 (USER, COMPANY 모두 허용)
+                        // 프로필
                         // =========================
                         .requestMatchers("/api/profile/public").authenticated()
                         .requestMatchers("/api/company/profile/public").authenticated()
 
-                        // =========================
-                        // 내 프로필
-                        // =========================
                         .requestMatchers("/api/profile/me/**").hasRole("USER")
                         .requestMatchers("/api/company/profile/me").hasRole("COMPANY")
                         .requestMatchers("/api/company/profile/me/**").hasRole("COMPANY")
 
                         // =========================
-                        // 기타 USER 전용
+                        // USER 전용
                         // =========================
                         .requestMatchers("/api/applications/**").hasRole("USER")
 
+                        // 나머지는 인증 필요
                         .anyRequest().authenticated()
                 )
 
+                // JWT 필터
                 .addFilterBefore(
                         jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class
@@ -82,11 +90,17 @@ public class SecurityConfig {
         return http.build();
     }
 
+    // =========================
+    // Password Encoder
+    // =========================
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    // =========================
+    // AuthenticationManager
+    // =========================
     @Bean
     public AuthenticationManager authenticationManager(
             AuthenticationConfiguration configuration
@@ -94,8 +108,12 @@ public class SecurityConfig {
         return configuration.getAuthenticationManager();
     }
 
+    // =========================
+    // CORS 설정 (PATCH 포함)
+    // =========================
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
+
         CorsConfiguration config = new CorsConfiguration();
 
         config.setAllowedOriginPatterns(List.of(
@@ -105,7 +123,12 @@ public class SecurityConfig {
         ));
 
         config.setAllowedMethods(List.of(
-                "GET", "POST", "PUT", "DELETE", "OPTIONS"
+                "GET",
+                "POST",
+                "PUT",
+                "PATCH",
+                "DELETE",
+                "OPTIONS"
         ));
 
         config.setAllowedHeaders(List.of("*"));

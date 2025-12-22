@@ -15,7 +15,10 @@ public class JwtTokenProvider {
 
     private final Key key;
 
-    private static final long ACCESS_30_MIN = 30 * 60 * 1000L;
+    //private static final long ACCESS_30_MIN = 30 * 60 * 1000L;
+
+    private static final long ACCESS_30_MIN = 1 * 60 * 1000L; // 테스트용 1분 처리
+
 
     public JwtTokenProvider(
             @Value("${jwt.secret}") String secretKey
@@ -23,7 +26,7 @@ public class JwtTokenProvider {
         this.key = Keys.hmacShaKeyFor(secretKey.getBytes());
     }
 
-    // ✅ Access Token 발급 ONLY
+    // Access Token 발급 ONLY
     public String generateAccessToken(
             Long accountId,
             String username,
