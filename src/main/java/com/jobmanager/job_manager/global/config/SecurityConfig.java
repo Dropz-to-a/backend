@@ -99,13 +99,6 @@ public class SecurityConfig {
         return configuration.getAuthenticationManager();
     }
 
-<<<<<<< HEAD
-    // CORS 설정
-=======
-    // =========================
-    // CORS 설정
-    // =========================
->>>>>>> dfc263a382a481e84af20158b3a831d4eddf2e3d
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
 
