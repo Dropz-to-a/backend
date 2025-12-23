@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -86,45 +87,38 @@ public class AuthController {
             )
     )
     @PostMapping("/login")
-    public AuthResponse login(@RequestBody LoginRequest req) {
-
+    public AuthResponse login(
+            @RequestBody LoginRequest req,
+            HttpServletResponse response
+    ) {
         AuthService.LoginResult result =
                 authService.login(req.getId(), req.getPassword());
 
-        return new AuthResponse(
-                result.accessToken(),
-                result.refreshToken()
-        );
+        Cookie refreshCookie = new Cookie("refreshToken", result.refreshToken());
+        refreshCookie.setHttpOnly(true);
+        refreshCookie.setSecure(true);
+        refreshCookie.setPath("/api/auth");
+        refreshCookie.setMaxAge(60 * 60 * 24);
+
+        response.addCookie(refreshCookie);
+
+        return new AuthResponse(result.accessToken());
     }
 
 
-    // ============================================================
-    // Access Token 재발급
-    // ============================================================
+    @PostMapping("/refresh")
     @Operation(
             summary = "Access Token 재발급",
             description = """
-                RefreshToken을 사용하여 AccessToken을 재발급합니다.
+            HttpOnly Cookie에 저장된 RefreshToken을 사용하여
+            AccessToken을 재발급합니다.
 
-                - refreshToken은 HttpOnly Cookie로 전달됩니다.
-                - 요청 Body는 필요하지 않습니다.
-                - RefreshToken이 만료되면 재로그인이 필요합니다.
-                """
+            - Request Body 없음
+            - refreshToken은 Cookie에서 자동 추출
+            """
     )
-    @ApiResponse(
-            responseCode = "200",
-            description = "재발급 성공",
-            content = @Content(
-                    schema = @Schema(implementation = AuthResponse.class)
-            )
-    )
-    @PostMapping("/refresh")
-    public AuthResponse refresh(@RequestBody RefreshRequest req) {
-
-        String newAccessToken =
-                authService.refresh(req.getRefreshToken());
-
-        return new AuthResponse(newAccessToken, null);
+    public AuthResponse refresh() {
+        return new AuthResponse(authService.refreshFromCookie());
     }
 
 
