@@ -7,17 +7,12 @@ import com.jobmanager.job_manager.global.exception.exceptions.BusinessException;
 import com.jobmanager.job_manager.global.jwt.JwtTokenProvider;
 import com.jobmanager.job_manager.global.jwt.TokenHashUtils;
 import com.jobmanager.job_manager.repository.*;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.UUID;
 
 @Service
@@ -131,7 +126,7 @@ public class AuthService {
     }
 
     // ============================================================
-    // Access Token 재발급 (기존 로직 유지)
+    // Access Token 재발급
     // ============================================================
     @Transactional(readOnly = true)
     public String refresh(String refreshTokenRaw) {
@@ -167,35 +162,11 @@ public class AuthService {
     }
 
     // ============================================================
-    // Access Token 재발급 (Cookie 기반 - Swagger parameter 제거용)
-    // ============================================================
-    @Transactional(readOnly = true)
-    public String refreshFromCookie() {
-
-        HttpServletRequest request =
-                ((ServletRequestAttributes) RequestContextHolder
-                        .currentRequestAttributes())
-                        .getRequest();
-
-        Cookie[] cookies = request.getCookies();
-        if (cookies == null) {
-            throw new BusinessException(AuthErrorCode.UNAUTHORIZED);
-        }
-
-        String refreshTokenRaw = Arrays.stream(cookies)
-                .filter(c -> "refreshToken".equals(c.getName()))
-                .findFirst()
-                .orElseThrow(() -> new BusinessException(AuthErrorCode.UNAUTHORIZED))
-                .getValue();
-
-        return refresh(refreshTokenRaw);
-    }
-
-    // ============================================================
-    // USER 온보딩 여부 판단
+    // USER 온보딩 여부 판단 (수정된 부분)
     // ============================================================
     private boolean isUserOnboarded(Account account) {
 
+        // USER가 아니면 항상 true
         if (account.getAccountType() != Account.AccountType.USER) {
             return true;
         }
