@@ -121,6 +121,7 @@ public class SecurityConfig {
         ));
 
         config.setAllowedHeaders(List.of("*"));
+        config.setExposedHeaders(List.of("Authorization"));
         config.setAllowCredentials(true);
         config.setMaxAge(3600L);
 
