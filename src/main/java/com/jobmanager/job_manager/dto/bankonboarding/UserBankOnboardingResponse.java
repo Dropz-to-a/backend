@@ -10,5 +10,4 @@ public class UserBankOnboardingResponse {
     private Long accountId;
     private String bankName;
     private String bankAccountNumber;
-    private boolean bankOnboarded;
 }

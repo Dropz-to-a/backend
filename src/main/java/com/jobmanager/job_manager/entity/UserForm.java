@@ -67,9 +67,6 @@ public class UserForm {
     @Column(name = "bank_account_number")
     private String bankAccountNumber;
 
-    @Column(name = "bank_onboarded")
-    private Boolean bankOnboarded;
-
     @PrePersist
     void onCreate() {
         this.createdAt = LocalDateTime.now();

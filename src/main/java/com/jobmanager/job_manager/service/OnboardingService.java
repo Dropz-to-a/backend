@@ -142,11 +142,6 @@ public class OnboardingService {
         UserForm form = userFormRepository.findById(accountId)
                 .orElseThrow(() -> new IllegalArgumentException("기본 유저 온보딩이 필요합니다."));
 
-        // 이미 계좌 온보딩 완료
-        if (Boolean.TRUE.equals(form.getBankOnboarded())) {
-            throw new IllegalArgumentException("이미 계좌 온보딩이 완료되었습니다.");
-        }
-
         // 직원 여부 확인 (어느 회사든 상관없음)
         boolean employed = employeeRepository.existsByEmployeeId(accountId);
         if (!employed) {
@@ -155,7 +150,6 @@ public class OnboardingService {
 
         form.setBankName(req.getBankName());
         form.setBankAccountNumber(req.getBankAccountNumber());
-        form.setBankOnboarded(true);
 
         userFormRepository.save(form);
 
@@ -163,7 +157,6 @@ public class OnboardingService {
                 .accountId(accountId)
                 .bankName(form.getBankName())
                 .bankAccountNumber(form.getBankAccountNumber())
-                .bankOnboarded(true)
                 .build();
     }
 }
