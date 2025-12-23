@@ -61,6 +61,12 @@ public class Company {
     @Column(name = "mission")
     private String mission;
 
+    @Column(name = "bank_name")
+    private String bankName;
+
+    @Column(name = "bank_account_number")
+    private String bankAccountNumber;
+
     /* ===== 타임스탬프 ===== */
 
     @Column(name = "created_at")

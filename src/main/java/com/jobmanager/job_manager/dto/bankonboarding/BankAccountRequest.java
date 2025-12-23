@@ -6,7 +6,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class UserBankOnboardingRequest {
+public class BankAccountRequest {
 
     @Schema(description = "은행명", example = "국민은행")
     private String bankName;

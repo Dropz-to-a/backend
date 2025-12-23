@@ -1,13 +1,15 @@
 // src/main/java/com/jobmanager/job_manager/service/OnboardingService.java
 package com.jobmanager.job_manager.service;
 
+import com.jobmanager.job_manager.dto.bankonboarding.BankAccountResponse;
 import com.jobmanager.job_manager.dto.onboarding.*;
-import com.jobmanager.job_manager.dto.bankonboarding.UserBankOnboardingRequest;
-import com.jobmanager.job_manager.dto.bankonboarding.UserBankOnboardingResponse;
+import com.jobmanager.job_manager.dto.bankonboarding.BankAccountRequest;
 import com.jobmanager.job_manager.entity.Account;
 import com.jobmanager.job_manager.entity.Company;
 import com.jobmanager.job_manager.entity.UserForm;
+import com.jobmanager.job_manager.global.exception.errorcodes.BankOnboardingErrorCode;
 import com.jobmanager.job_manager.global.exception.errorcodes.OnboardingErrorCode;
+import com.jobmanager.job_manager.global.exception.exceptions.BankOnboardingException;
 import com.jobmanager.job_manager.global.exception.exceptions.OnboardingException;
 import com.jobmanager.job_manager.repository.AccountRepository;
 import com.jobmanager.job_manager.repository.CompanyRepository;
@@ -135,28 +137,64 @@ public class OnboardingService {
         return CompanyOnboardingResponse.from(company);
     }
 
-    public UserBankOnboardingResponse onboardUserBank(
+    // =========================
+    // BANK 계좌 온보딩
+    // =========================
+    public BankAccountResponse saveBankAccount(
             Long accountId,
-            UserBankOnboardingRequest req
+            String role,
+            BankAccountRequest req
     ) {
-        UserForm form = userFormRepository.findById(accountId)
-                .orElseThrow(() -> new IllegalArgumentException("기본 유저 온보딩이 필요합니다."));
-
-        // 직원 여부 확인 (어느 회사든 상관없음)
-        boolean employed = employeeRepository.existsByEmployeeId(accountId);
-        if (!employed) {
-            throw new IllegalArgumentException("재직 중인 사용자만 계좌 온보딩이 가능합니다.");
+        // USER인 경우 재직자 필수
+        if ("ROLE_USER".equals(role)) {
+            if (!employeeRepository.existsByEmployeeId(accountId)) {
+                throw new BankOnboardingException(
+                        BankOnboardingErrorCode.USER_NOT_EMPLOYED
+                );
+            }
         }
 
-        form.setBankName(req.getBankName());
-        form.setBankAccountNumber(req.getBankAccountNumber());
+        if ("ROLE_USER".equals(role)) {
+            UserForm form = userFormRepository.findById(accountId)
+                    .orElseThrow(() ->
+                            new BankOnboardingException(
+                                    BankOnboardingErrorCode.USER_NOT_ONBOARDED
+                            )
+                    );
 
-        userFormRepository.save(form);
+            form.setBankName(req.getBankName());
+            form.setBankAccountNumber(req.getBankAccountNumber());
+            userFormRepository.save(form);
 
-        return UserBankOnboardingResponse.builder()
-                .accountId(accountId)
-                .bankName(form.getBankName())
-                .bankAccountNumber(form.getBankAccountNumber())
-                .build();
+            return BankAccountResponse.builder()
+                    .accountId(accountId)
+                    .role(role)
+                    .bankName(form.getBankName())
+                    .bankAccountNumber(form.getBankAccountNumber())
+                    .build();
+
+        } else if ("ROLE_COMPANY".equals(role)) {
+            Company company = companyRepository.findById(accountId)
+                    .orElseThrow(() ->
+                            new BankOnboardingException(
+                                    BankOnboardingErrorCode.COMPANY_NOT_ONBOARDED
+                            )
+                    );
+
+            company.setBankName(req.getBankName());
+            company.setBankAccountNumber(req.getBankAccountNumber());
+            companyRepository.save(company);
+
+            return BankAccountResponse.builder()
+                    .accountId(accountId)
+                    .role(role)
+                    .bankName(company.getBankName())
+                    .bankAccountNumber(company.getBankAccountNumber())
+                    .build();
+        }
+
+        throw new BankOnboardingException(
+                BankOnboardingErrorCode.INVALID_ACCOUNT_TYPE
+        );
     }
 }

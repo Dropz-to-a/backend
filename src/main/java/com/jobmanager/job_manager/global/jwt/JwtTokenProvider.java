@@ -15,9 +15,9 @@ public class JwtTokenProvider {
 
     private final Key key;
 
-    //private static final long ACCESS_30_MIN = 30 * 60 * 1000L;
+    private static final long ACCESS_30_MIN = 30 * 60 * 1000L;
 
-    private static final long ACCESS_30_MIN = 1 * 60 * 1000L; // 테스트용 1분 처리
+    //private static final long ACCESS_30_MIN = 1 * 60 * 1000L; // 테스트용 1분 처리
 
 
     public JwtTokenProvider(
