@@ -1,11 +1,7 @@
 package com.jobmanager.job_manager.global.exception;
 
-import com.jobmanager.job_manager.global.exception.errorcodes.AuthErrorCode;
-import com.jobmanager.job_manager.global.exception.errorcodes.CompanyErrorCode;
-import com.jobmanager.job_manager.global.exception.errorcodes.OnboardingErrorCode;
-import com.jobmanager.job_manager.global.exception.exceptions.BusinessException;
-import com.jobmanager.job_manager.global.exception.exceptions.CompanyException;
-import com.jobmanager.job_manager.global.exception.exceptions.OnboardingException;
+import com.jobmanager.job_manager.global.exception.errorcodes.*;
+import com.jobmanager.job_manager.global.exception.exceptions.*;
 import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -16,10 +12,6 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
-import com.jobmanager.job_manager.global.exception.errorcodes.ProfileErrorCode;
-import com.jobmanager.job_manager.global.exception.exceptions.ProfileException;
-import com.jobmanager.job_manager.global.exception.errorcodes.UserFamilyErrorCode;
-import com.jobmanager.job_manager.global.exception.exceptions.UserFamilyException;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -236,6 +228,26 @@ public class GlobalExceptionHandler {
         );
 
         return ResponseEntity.status(code.getStatus()).body(body);
+    }
+
+    @ExceptionHandler(BankOnboardingException.class)
+    public ResponseEntity<ErrorResponse> handleBankOnboardingException(
+            BankOnboardingException e,
+            HttpServletRequest req
+    ) {
+        BankOnboardingErrorCode code = e.getErrorCode();
+
+        ErrorResponse body = new ErrorResponse(
+                code.getStatus().value(),
+                code.getStatus().getReasonPhrase(),
+                code.getMessage(),
+                req.getRequestURI(),
+                LocalDateTime.now()
+        );
+
+        return ResponseEntity
+                .status(code.getStatus())
+                .body(body);
     }
 
     // ========================================================================
