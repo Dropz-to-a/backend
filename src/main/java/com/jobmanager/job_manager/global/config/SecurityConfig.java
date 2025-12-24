@@ -33,35 +33,26 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
-                // CORS 명시적 적용 (중요)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-
-                // JWT 방식 → CSRF 끔
                 .csrf(csrf -> csrf.disable())
-
-                // 세션 미사용
                 .sessionManagement(sm ->
                         sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-
                 .authorizeHttpRequests(auth -> auth
-                        // Preflight 요청 허용
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                        // Swagger
                         .requestMatchers(
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html"
                         ).permitAll()
 
-                        // 인증 API
                         .requestMatchers("/api/auth/**").permitAll()
 
-                        // 공개 채용 공고
                         .requestMatchers(HttpMethod.GET, "/api/job-postings/**").permitAll()
 
-                        // 프로필
+                        .requestMatchers("/api/bank/**").authenticated()
+
                         .requestMatchers("/api/profile/public").authenticated()
                         .requestMatchers("/api/company/profile/public").authenticated()
 
@@ -70,14 +61,10 @@ public class SecurityConfig {
                         .requestMatchers("/api/company/profile/me").hasRole("COMPANY")
                         .requestMatchers("/api/company/profile/me/**").hasRole("COMPANY")
 
-                        // USER 전용
                         .requestMatchers("/api/applications/**").hasRole("USER")
 
-                        // 나머지는 인증 필요
                         .anyRequest().authenticated()
                 )
-
-                // JWT 필터
                 .addFilterBefore(
                         jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class
@@ -86,13 +73,11 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // Password Encoder
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    // AuthenticationManager
     @Bean
     public AuthenticationManager authenticationManager(
             AuthenticationConfiguration configuration

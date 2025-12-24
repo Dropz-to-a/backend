@@ -5,27 +5,24 @@ import com.jobmanager.job_manager.service.client.ApickClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-/**
- * 1원 인증 처리 서비스
- */
+import java.util.Map;
+
 @Service
 @RequiredArgsConstructor
 public class BankOnboardingService {
 
     private final ApickClient apickClient;
 
-    // 1원 송금 요청
-    public void requestOneWon(OneWonRequest req) {
-        apickClient.sendOneWon(
+    public Map<String, Object> requestOneWon(OneWonRequest req) {
+        return apickClient.sendOneWon(
                 req.bankCode(),
                 req.accountNumber(),
                 req.holderName()
         );
     }
 
-    // 인증번호 검증
-    public void verifyOneWon(OneWonVerifyRequest req) {
-        apickClient.verifyOneWon(
+    public Map<String, Object> verifyOneWon(OneWonVerifyRequest req) {
+        return apickClient.verifyOneWon(
                 req.bankCode(),
                 req.accountNumber(),
                 req.authCode()

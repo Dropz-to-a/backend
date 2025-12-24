@@ -2,14 +2,12 @@ package com.jobmanager.job_manager.service.client;
 
 import com.jobmanager.job_manager.global.config.ApickProperties;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Map;
 
-/**
- * APICK 1원 인증 연동 클라이언트
- */
 @Component
 @RequiredArgsConstructor
 public class ApickClient {
@@ -17,8 +15,14 @@ public class ApickClient {
     private final ApickProperties properties;
     private final RestTemplate restTemplate = new RestTemplate();
 
-    // 1원 송금
-    public void sendOneWon(String bankCode, String account, String holder) {
+    public Map<String, Object> sendOneWon(
+            String bankCode,
+            String account,
+            String holder
+    ) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("Authorization", "Bearer " + properties.getAuthKey());
 
         Map<String, Object> body = Map.of(
                 "bank_code", bankCode,
@@ -26,26 +30,38 @@ public class ApickClient {
                 "holder_name", holder
         );
 
-        restTemplate.postForObject(
+        HttpEntity<Map<String, Object>> request =
+                new HttpEntity<>(body, headers);
+
+        return restTemplate.postForObject(
                 properties.getBaseUrl() + "/v1/account/onewon/request",
-                body,
-                Void.class
+                request,
+                Map.class
         );
     }
 
-    // 인증번호 검증
-    public void verifyOneWon(String bankCode, String account, String code) {
+    public Map<String, Object> verifyOneWon(
+            String bankCode,
+            String account,
+            String authCode
+    ) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("Authorization", "Bearer " + properties.getAuthKey());
 
         Map<String, Object> body = Map.of(
                 "bank_code", bankCode,
                 "account_number", account,
-                "auth_code", code
+                "auth_code", authCode
         );
 
-        restTemplate.postForObject(
+        HttpEntity<Map<String, Object>> request =
+                new HttpEntity<>(body, headers);
+
+        return restTemplate.postForObject(
                 properties.getBaseUrl() + "/v1/account/onewon/verify",
-                body,
-                Void.class
+                request,
+                Map.class
         );
     }
 }
