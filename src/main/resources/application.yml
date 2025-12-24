@@ -6,9 +6,9 @@ spring:
     name: job-manager
 
   datasource:
-    url: jdbc:mysql://mysql-1bd69c46-capstone2.g.aivencloud.com:25590/job_manager?ssl-mode=REQUIRED
-    username: avnadmin
-    password: AVNS_Ozi4pud2pUgpPbOzJ9V
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
@@ -37,12 +37,12 @@ management:
         include: health,info
 
 jwt:
-  secret: "12345678901234567890123456789012"
+  secret: ${JWT_SECRET}
   expiration-ms: 3600000
 
 toss:
   base-url: https://api.tosspayments.com
-  secret-key: ${TOSS_SECRET_KEY:}
+  secret-key: ${TOSS_SECRET_KEY}
 
 payments:
   success-url: ${PAY_SUCCESS_URL:https://localhost:5173/pay/success}
@@ -50,4 +50,4 @@ payments:
 
 apick:
   base-url: https://apick.app/rest
-  auth-key: dfc484a3d26db7657939707950e8397c
+  auth-key: ${APICK_AUTH_KEY}
