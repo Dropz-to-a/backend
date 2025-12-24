@@ -9,6 +9,7 @@ import com.jobmanager.job_manager.service.UserActivityService;
 import com.jobmanager.job_manager.service.UserFamilyService;
 import com.jobmanager.job_manager.service.UserProfileService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -60,12 +61,17 @@ public class UserProfileController {
         return userProfileService.updateMyProfile(principal.getAccountId(), req);
     }
 
-    @PostMapping("/public")
+    /**
+     * ✅ 수정된 부분
+     * POST + Body → GET + Query Param
+     */
+    @GetMapping("/public")
     @Operation(summary = "유저 공개 프로필 조회")
     public UserProfileResponse getPublicUserProfile(
-            @RequestBody UserProfileQueryRequest req
+            @Parameter(description = "조회할 유저 accountId", required = true)
+            @RequestParam("id") Long accountId
     ) {
-        return userProfileService.getPublicProfile(req.getAccountId());
+        return userProfileService.getPublicProfile(accountId);
     }
 
     /** =========================
@@ -100,9 +106,9 @@ public class UserProfileController {
         userFamilyService.deleteFamily(principal.getAccountId(), familyId);
     }
 
-    // =========================
-    // 활동(경력) 관리
-    // =========================
+    /** =========================
+     *  활동(경력) 관리
+     *  ========================= */
 
     @PostMapping("/me/activities")
     @Operation(summary = "경력 추가")
