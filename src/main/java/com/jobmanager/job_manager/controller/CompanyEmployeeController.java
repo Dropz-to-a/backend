@@ -2,22 +2,25 @@ package com.jobmanager.job_manager.controller;
 
 import com.jobmanager.job_manager.dto.company.AssignTeamRequest;
 import com.jobmanager.job_manager.dto.company.CompanyEmployeeAssignRequest;
+import com.jobmanager.job_manager.dto.company.CompanyEmployeeResponse;
+import com.jobmanager.job_manager.dto.company.CompanyTeamResponse;
 import com.jobmanager.job_manager.dto.company.CreateTeamRequest;
 import com.jobmanager.job_manager.dto.company.CreateTeamResponse;
 import com.jobmanager.job_manager.global.jwt.JwtHeaderUtils;
 import com.jobmanager.job_manager.global.jwt.JwtTokenProvider;
 import com.jobmanager.job_manager.global.jwt.SimpleUserPrincipal;
+import com.jobmanager.job_manager.service.CompanyEmployeeQueryService;
 import com.jobmanager.job_manager.service.CompanyTeamService;
 import com.jobmanager.job_manager.service.EmployeeService;
 import com.jobmanager.job_manager.service.EmployeeTeamService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Tag(
         name = "Company-Employee",
@@ -26,7 +29,7 @@ import org.springframework.web.bind.annotation.*;
             """
 )
 @RestController
-@RequestMapping("/api/company")
+@RequestMapping("/api/company/manage")
 @RequiredArgsConstructor
 public class CompanyEmployeeController {
 
@@ -34,6 +37,7 @@ public class CompanyEmployeeController {
     private final JwtTokenProvider jwt;
     private final CompanyTeamService companyTeamService;
     private final EmployeeTeamService employeeTeamService;
+    private final CompanyEmployeeQueryService companyEmployeeQueryService;
 
     /** JWT에서 현재 로그인한 회사 accountId 추출 */
     private long currentCompanyId() {
@@ -49,17 +53,9 @@ public class CompanyEmployeeController {
             summary = "직원 등록",
             description = """
                 현재 로그인한 회사(COMPANY)가 USER 계정을 직원으로 등록합니다.
-
-                사용 시나리오
-                - 회사 관리자가 이미 가입된 USER 계정을 직원으로 초대
-
-                조건
-                - COMPANY 계정만 호출 가능
-                - employeeId는 USER accountId 기준
-                - 이미 다른 회사 소속이거나, 이미 우리 회사 직원인 경우 등록 불가
                 """
     )
-    @PostMapping("/assign-employee")
+    @PostMapping("/employees")
     public String assignEmployee(
             Authentication authentication,
             @RequestBody CompanyEmployeeAssignRequest req
@@ -73,43 +69,24 @@ public class CompanyEmployeeController {
             summary = "직원 해제",
             description = """
                 현재 로그인한 회사(COMPANY)에서 특정 직원을 소속 해제합니다.
-
-                사용 시나리오
-                - 퇴사 처리
-                - 더 이상 회사 소속이 아닌 직원 제거
-
-                조건
-                - COMPANY 계정만 호출 가능
-                - 해당 회사에 실제로 소속된 직원만 해제 가능
                 """
     )
-    @DeleteMapping("/remove-employee")
+    @DeleteMapping("/employees/{employeeId}")
     public String removeEmployee(
             Authentication authentication,
-            @RequestParam Long employeeId
+            @PathVariable Long employeeId
     ) {
         validateCompany(authentication);
         employeeService.removeEmployee(currentCompanyId(), employeeId);
         return "해제 완료";
     }
 
+
     /* ==================================================
        부서(팀) 관리
        ================================================== */
 
-    @Operation(
-            summary = "부서(팀) 생성",
-            description = """
-                현재 로그인한 회사(COMPANY)가 새로운 부서(팀)를 생성합니다.
-
-                사용 시나리오
-                - 조직 구성(개발팀, 기획팀 등)
-
-                조건
-                - COMPANY 계정만 호출 가능
-                - 같은 회사 내 부서명 중복 불가
-                """
-    )
+    @Operation(summary = "부서(팀) 생성")
     @PostMapping("/teams")
     public CreateTeamResponse createTeam(
             Authentication authentication,
@@ -125,19 +102,7 @@ public class CompanyEmployeeController {
         );
     }
 
-    @Operation(
-            summary = "부서(팀) 삭제",
-            description = """
-                회사가 보유한 부서(팀)를 삭제합니다.
-
-                동작 방식
-                - 해당 부서에 소속된 직원들은 자동으로 부서 해제(team_id = NULL)
-
-                조건
-                - COMPANY 계정만 호출 가능
-                - 해당 회사 소유의 부서만 삭제 가능
-                """
-    )
+    @Operation(summary = "부서(팀) 삭제")
     @DeleteMapping("/teams/{teamId}")
     public String deleteTeam(
             Authentication authentication,
@@ -148,16 +113,7 @@ public class CompanyEmployeeController {
         return "부서 삭제 완료";
     }
 
-    @Operation(
-            summary = "직원 부서 최초 지정",
-            description = """
-            회사 소속 직원에게 부서를 최초로 지정합니다.
-
-            조건
-            - COMPANY 계정만 호출 가능
-            - 직원은 아직 부서가 없어야 함
-            """
-    )
+    @Operation(summary = "직원 부서 최초 지정")
     @PostMapping("/teams/assign")
     public String assignTeam(
             Authentication authentication,
@@ -172,19 +128,7 @@ public class CompanyEmployeeController {
         return "부서 지정 완료";
     }
 
-    @Operation(
-            summary = "직원 부서 변경",
-            description = """
-            회사 소속 직원의 부서를 변경합니다.
-
-            사용 시나리오
-            - 인사 이동
-
-            조건
-            - COMPANY 계정만 호출 가능
-            - 직원은 기존에 부서가 지정되어 있어야 함
-            """
-    )
+    @Operation(summary = "직원 부서 변경")
     @PatchMapping("/teams/change")
     public String changeTeam(
             Authentication authentication,
@@ -199,6 +143,30 @@ public class CompanyEmployeeController {
         );
 
         return "부서 변경 완료";
+    }
+
+    /* ==================================================
+       조회 API
+       ================================================== */
+
+    @Operation(
+            summary = "부서(팀) 목록 조회",
+            description = "현재 로그인한 회사(COMPANY)가 보유한 부서 목록 조회"
+    )
+    @GetMapping("/teams")
+    public List<CompanyTeamResponse> getTeams(Authentication authentication) {
+        validateCompany(authentication);
+        return companyEmployeeQueryService.getMyTeams(currentCompanyId());
+    }
+
+    @Operation(
+            summary = "회사 직원 목록 조회 (부서 포함)",
+            description = "현재 로그인한 회사(COMPANY)에 소속된 직원 목록 조회"
+    )
+    @GetMapping("/employees")
+    public List<CompanyEmployeeResponse> getEmployees(Authentication authentication) {
+        validateCompany(authentication);
+        return companyEmployeeQueryService.getMyCompanyEmployees(currentCompanyId());
     }
 
     /* ==================================================
