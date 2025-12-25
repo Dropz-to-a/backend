@@ -12,16 +12,16 @@ import java.time.LocalDateTime;
 public class CompanyApplicationResponse {
 
     private Long applicationId;
-    private Long applicantId;
-    private String applicantName;
+    private Long writerId;
+    private String name;
     private ApplicationStatus status;
     private LocalDateTime appliedAt;
 
     public static CompanyApplicationResponse from(Application app) {
         return CompanyApplicationResponse.builder()
                 .applicationId(app.getId())
-                .applicantId(app.getApplicantId())
-                .applicantName(app.getApplicantName())
+                .writerId(app.getWriterId())
+                .name(app.getName())
                 .status(app.getStatus())
                 .appliedAt(app.getCreatedAt())
                 .build();

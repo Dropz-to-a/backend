@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -22,28 +23,55 @@ public class ApplicationService {
     private final ApplicationRepository applicationRepository;
     private final JobPostingRepository jobPostingRepository;
 
-    public void apply(Long applicantId, ApplicationCreateRequest request) {
+    public void apply(Long writerId, ApplicationCreateRequest req) {
 
-        if (applicationRepository.existsByPostingIdAndApplicantId(
-                request.getPostingId(), applicantId)) {
+        if (applicationRepository.existsByPostingIdAndWriterId(
+                req.getPostingId(), writerId)) {
             throw new IllegalStateException("이미 지원한 공고입니다.");
         }
 
-        Application application = Application.builder()
-                .postingId(request.getPostingId())
-                .applicantId(applicantId)
-                .applicantName(request.getApplicantName())
-                .motivation(request.getMotivation())
+        Application app = Application.builder()
+                .postingId(req.getPostingId())
+                .writerId(writerId)
+
+                // 기본 정보
+                .name(req.getName())
+                .birth(parseDate(req.getBirth()))
+                .email(req.getEmail())
+                .phone(req.getPhone())
+                .address(req.getAddress())
+                .profileImageUrl(req.getProfileImageUrl())
+
+                // 학력
+                .educationSchool(req.getEducationSchool())
+                .educationMajor(req.getEducationMajor())
+                .educationDegree(req.getEducationDegree())
+                .educationStartDate(parseDate(req.getEducationStartDate()))
+                .educationEndDate(parseDate(req.getEducationEndDate()))
+                .educationGraduated(req.isEducationGraduated())
+
+                // 대외활동
+                .activities(req.getActivities())
+
+                // 자기소개
+                .introduction(req.getIntroduction())
+                .motivation(req.getMotivation())
+                .personality(req.getPersonality())
+                .futureGoal(req.getFutureGoal())
+
+                // 기타
+                .portfolioUrl(req.getPortfolioUrl())
+
                 .status(ApplicationStatus.APPLIED)
                 .build();
 
-        applicationRepository.save(application);
+        applicationRepository.save(app);
     }
 
     @Transactional(readOnly = true)
-    public List<MyApplicationResponse> getMyApplications(Long applicantId) {
+    public List<MyApplicationResponse> getMyApplications(Long writerId) {
         return applicationRepository
-                .findByApplicantIdOrderByCreatedAtDesc(applicantId)
+                .findByWriterIdOrderByCreatedAtDesc(writerId)
                 .stream()
                 .map(MyApplicationResponse::from)
                 .toList();
@@ -99,5 +127,12 @@ public class ApplicationService {
         }
 
         app.setStatus(nextStatus);
+    }
+
+    private LocalDate parseDate(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        return LocalDate.parse(value);
     }
 }
