@@ -4,66 +4,178 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 
 @Getter
-@Schema(
-        description = "채용 공고 지원서 생성 요청",
-        example = """
-        {
-          "postingId": 7,
-          "name": "홍길동",
-          "birth": "2008-08-09",
-          "email": "hong@example.com",
-          "phone": "010-1234-5678",
-          "address": "서울특별시 강남구 테헤란로 123",
-          "profileImageUrl": "https://example.com/profile.jpg",
-          "educationSchool": "서울소프트웨어고등학교",
-          "educationMajor": "소프트웨어개발과",
-          "educationDegree": "고등학교",
-          "educationStartDate": "2023-03-02",
-          "educationEndDate": "2026-02-28",
-          "educationGraduated": false,
-          "activities": "교내 프로그래밍 동아리 활동",
-          "introduction": "백엔드 개발자를 목표로 하고 있습니다.",
-          "motivation": "실무 경험을 쌓기 위해 지원했습니다.",
-          "personality": "책임감 있고 성실합니다.",
-          "futureGoal": "신뢰받는 서버 개발자가 되는 것입니다.",
-          "portfolioUrl": "https://github.com/example"
-        }
-        """
-)
+@Schema(description = "채용 공고 지원서 생성 요청")
 public class ApplicationCreateRequest {
 
+    @Schema(example = "7")
     private Long postingId;
 
+    // =====================
     // 기본 정보
+    // =====================
+    @Schema(example = "홍길동")
     private String name;
-    private String birth;          // yyyy-MM-dd
+
+    @Schema(example = "2008-08-09")
+    private String birth; // yyyy-MM-dd
+
+    @Schema(example = "hong@example.com")
     private String email;
+
+    @Schema(example = "010-1234-5678")
     private String phone;
+
+    @Schema(example = "서울특별시 강남구 테헤란로 123")
     private String address;
+
+    @Schema(example = "https://example.com/profile.jpg")
     private String profileImageUrl;
 
+    // =====================
     // 학력
+    // =====================
+    @Schema(example = "서울소프트웨어고등학교")
     private String educationSchool;
+
+    @Schema(example = "소프트웨어개발과")
     private String educationMajor;
 
-    /**
-     * 학교 구분 (예: 고등학교 / 전문대 / 대학교 / 대학원)
-     */
+    @Schema(
+            description = "학위",
+            example = "HIGH_SCHOOL",
+            allowableValues = {
+                    "HIGH_SCHOOL", "ASSOCIATE", "BACHELOR", "MASTER", "DOCTOR"
+            }
+    )
     private String educationDegree;
 
+    @Schema(example = "2023-03-02")
     private String educationStartDate;
+
+    @Schema(example = "2026-02-28")
     private String educationEndDate;
+
+    @Schema(example = "false")
     private boolean educationGraduated;
 
+    // =====================
     // 대외활동
+    // =====================
+    @Schema(example = "교내 프로그래밍 동아리 활동")
     private String activities;
 
+    // =====================
     // 자기소개
+    // =====================
+    @Schema(example = "백엔드 개발자를 목표로 하고 있습니다.")
     private String introduction;
+
+    @Schema(example = "실무 경험을 쌓기 위해 지원했습니다.")
     private String motivation;
+
+    @Schema(example = "책임감 있고 성실합니다.")
     private String personality;
+
+    @Schema(example = "신뢰받는 서버 개발자가 되는 것입니다.")
     private String futureGoal;
 
+    // =====================
+    // 신체
+    // =====================
+    @Schema(example = "175")
+    private String height;
+
+    @Schema(example = "68")
+    private String weight;
+
+    @Schema(example = "O")
+    private String blood;
+
+    // =====================
+    // 병역
+    // =====================
+    @Schema(example = "군필")
+    private String militaryStatus;
+
+    @Schema(example = "육군")
+    private String militaryBranch;
+
+    @Schema(example = "현역")
+    private String militaryType;
+
+    @Schema(example = "병장")
+    private String militaryRank;
+
+    @Schema(example = "2021.03 ~ 2023.02")
+    private String militaryPeriod;
+
+    @Schema(example = "해당 없음")
+    private String militaryExemptReason;
+
+    // =====================
+    // 수상 내역
+    // =====================
+    @Schema(example = "전국 SW 경진대회 대상")
+    private String awardName1;
+
+    @Schema(example = "2024-11-10")
+    private String awardDate1;
+
+    @Schema(example = "과학기술정보통신부")
+    private String awardIssuer1;
+
+    private String awardName2;
+    private String awardDate2;
+    private String awardIssuer2;
+
+    private String awardName3;
+    private String awardDate3;
+    private String awardIssuer3;
+
+    // =====================
+    // 외국어
+    // =====================
+    @Schema(example = "비즈니스 회화")
+    private String foreignLangAbility1;
+
+    @Schema(example = "TOEIC")
+    private String foreignLangTest1;
+
+    @Schema(example = "850")
+    private String foreignLangScore1;
+
+    private String foreignLangAbility2;
+    private String foreignLangTest2;
+    private String foreignLangScore2;
+
+    // ===== 가족 (최대 4명) =====
+    private String familyRelation1;
+    private String familyName1;
+    private String familyAge1;
+    private String familyJob1;
+
+    private String familyRelation2;
+    private String familyName2;
+    private String familyAge2;
+    private String familyJob2;
+
+    private String familyRelation3;
+    private String familyName3;
+    private String familyAge3;
+    private String familyJob3;
+
+    private String familyRelation4;
+    private String familyName4;
+    private String familyAge4;
+    private String familyJob4;
+
+    // ===== 취미 / 특기 =====
+    private String hobby;
+    private String specialty;
+
+    // =====================
     // 기타
+    // =====================
+    @Schema(example = "https://github.com/example")
     private String portfolioUrl;
 }

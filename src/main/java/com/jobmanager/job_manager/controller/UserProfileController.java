@@ -62,8 +62,7 @@ public class UserProfileController {
     }
 
     /**
-     * ✅ 수정된 부분
-     * POST + Body → GET + Query Param
+     * 공개 프로필 조회
      */
     @GetMapping("/public")
     @Operation(summary = "유저 공개 프로필 조회")
@@ -90,10 +89,18 @@ public class UserProfileController {
     public void addFamily(
             Authentication authentication,
             @RequestParam String role,
-            @RequestParam String name
+            @RequestParam String name,
+            @RequestParam(required = false) Integer age,
+            @RequestParam(required = false) String job
     ) {
         SimpleUserPrincipal principal = getUser(authentication);
-        userFamilyService.addFamily(principal.getAccountId(), role, name);
+        userFamilyService.addFamily(
+                principal.getAccountId(),
+                role,
+                name,
+                age,
+                job
+        );
     }
 
     @DeleteMapping("/me/family/{familyId}")

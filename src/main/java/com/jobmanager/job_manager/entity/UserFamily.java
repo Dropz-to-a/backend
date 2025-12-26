@@ -20,8 +20,14 @@ public class UserFamily {
     private Long accountId;
 
     @Column(nullable = false, length = 50)
-    private String role;   // 엄마, 아빠, 형, 누나 등
+    private String role;   // 관계 (엄마, 아빠, 형, 누나 등)
 
     @Column(nullable = false, length = 100)
-    private String name;
+    private String name;   // 성명
+
+    @Column
+    private Integer age;   // 연령 (null 허용)
+
+    @Column(length = 100)
+    private String job;    // 직업 (null 허용)
 }

@@ -49,7 +49,13 @@ public class UserFamilyService {
     /**
      * 가족 정보 추가
      */
-    public void addFamily(Long accountId, String role, String name) {
+    public void addFamily(
+            Long accountId,
+            String role,
+            String name,
+            Integer age,
+            String job
+    ) {
         checkOnboarded(accountId);
 
         if (role == null || role.isBlank() || name == null || name.isBlank()) {
@@ -64,6 +70,8 @@ public class UserFamilyService {
                 .accountId(accountId)
                 .role(role)
                 .name(name)
+                .age(age)   // 추가
+                .job(job)   // 추가
                 .build();
 
         userFamilyRepository.save(family);

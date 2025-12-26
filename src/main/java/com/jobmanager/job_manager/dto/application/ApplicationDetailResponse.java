@@ -39,6 +39,66 @@ public class ApplicationDetailResponse {
     private String personality;
     private String futureGoal;
 
+    // ===== 신체 =====
+    private String height;
+    private String weight;
+    private String blood;
+
+    // ===== 병역 =====
+    private String militaryStatus;
+    private String militaryBranch;
+    private String militaryType;
+    private String militaryRank;
+    private String militaryPeriod;
+    private String militaryExemptReason;
+
+    // ===== 수상 내역 =====
+    private String awardName1;
+    private LocalDate awardDate1;
+    private String awardIssuer1;
+
+    private String awardName2;
+    private LocalDate awardDate2;
+    private String awardIssuer2;
+
+    private String awardName3;
+    private LocalDate awardDate3;
+    private String awardIssuer3;
+
+    // ===== 외국어 활용 능력 =====
+    private String foreignLangAbility1;
+    private String foreignLangTest1;
+    private String foreignLangScore1;
+
+    private String foreignLangAbility2;
+    private String foreignLangTest2;
+    private String foreignLangScore2;
+
+    // ===== 가족 =====
+    private String familyRelation1;
+    private String familyName1;
+    private String familyAge1;
+    private String familyJob1;
+
+    private String familyRelation2;
+    private String familyName2;
+    private String familyAge2;
+    private String familyJob2;
+
+    private String familyRelation3;
+    private String familyName3;
+    private String familyAge3;
+    private String familyJob3;
+
+    private String familyRelation4;
+    private String familyName4;
+    private String familyAge4;
+    private String familyJob4;
+
+    // ===== 취미 / 특기 =====
+    private String hobby;
+    private String specialty;
+
     private ApplicationStatus status;
     private LocalDateTime appliedAt;
 
@@ -66,6 +126,60 @@ public class ApplicationDetailResponse {
                 .motivation(app.getMotivation())
                 .personality(app.getPersonality())
                 .futureGoal(app.getFutureGoal())
+
+                .height(app.getHeight())
+                .weight(app.getWeight())
+                .blood(app.getBlood())
+
+                .militaryStatus(app.getMilitaryStatus())
+                .militaryBranch(app.getMilitaryBranch())
+                .militaryType(app.getMilitaryType())
+                .militaryRank(app.getMilitaryRank())
+                .militaryPeriod(app.getMilitaryPeriod())
+                .militaryExemptReason(app.getMilitaryExemptReason())
+
+                .awardName1(app.getAwardName1())
+                .awardDate1(app.getAwardDate1())
+                .awardIssuer1(app.getAwardIssuer1())
+
+                .awardName2(app.getAwardName2())
+                .awardDate2(app.getAwardDate2())
+                .awardIssuer2(app.getAwardIssuer2())
+
+                .awardName3(app.getAwardName3())
+                .awardDate3(app.getAwardDate3())
+                .awardIssuer3(app.getAwardIssuer3())
+
+                .foreignLangAbility1(app.getForeignLangAbility1())
+                .foreignLangTest1(app.getForeignLangTest1())
+                .foreignLangScore1(app.getForeignLangScore1())
+
+                .foreignLangAbility2(app.getForeignLangAbility2())
+                .foreignLangTest2(app.getForeignLangTest2())
+                .foreignLangScore2(app.getForeignLangScore2())
+
+                .familyRelation1(app.getFamilyRelation1())
+                .familyName1(app.getFamilyName1())
+                .familyAge1(app.getFamilyAge1())
+                .familyJob1(app.getFamilyJob1())
+
+                .familyRelation2(app.getFamilyRelation2())
+                .familyName2(app.getFamilyName2())
+                .familyAge2(app.getFamilyAge2())
+                .familyJob2(app.getFamilyJob2())
+
+                .familyRelation3(app.getFamilyRelation3())
+                .familyName3(app.getFamilyName3())
+                .familyAge3(app.getFamilyAge3())
+                .familyJob3(app.getFamilyJob3())
+
+                .familyRelation4(app.getFamilyRelation4())
+                .familyName4(app.getFamilyName4())
+                .familyAge4(app.getFamilyAge4())
+                .familyJob4(app.getFamilyJob4())
+
+                .hobby(app.getHobby())
+                .specialty(app.getSpecialty())
 
                 .status(app.getStatus())
                 .appliedAt(app.getCreatedAt())
