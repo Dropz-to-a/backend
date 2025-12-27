@@ -12,6 +12,9 @@ public class CompanyEmployeeResponse {
     @Schema(description = "직원 accountId", example = "5")
     private Long employeeAccountId;
 
+    @Schema(description = "직원 이름", example = "홍길동")
+    private String name;
+
     @Schema(description = "부서 ID (없으면 null)", example = "1", nullable = true)
     private Long teamId;
 

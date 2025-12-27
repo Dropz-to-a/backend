@@ -64,9 +64,11 @@ public class CompanyController {
                 현재 로그인된 회사에 소속된 직원 목록을 조회합니다.
                 
                  반환 데이터 예시
-                - 직원 accountId
-                - 이름/닉네임, 이메일
-                - 고용 상태(재직/퇴사 등) (엔티티/DTO 설계에 따라 확장)
+                 - employeeAccountId : 직원 계정 ID
+                 - name              : 직원 이름
+                 - teamId            : 부서 ID (없으면 null)
+                 - teamName          : 부서명 (없으면 null)
+                 - joinedAt          : 입사일시 (ISO-8601)
                 """
     )
     @ApiResponse(

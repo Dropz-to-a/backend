@@ -4,11 +4,14 @@ import com.jobmanager.job_manager.dto.company.CompanyEmployeeResponse;
 import com.jobmanager.job_manager.dto.company.CompanyTeamResponse;
 import com.jobmanager.job_manager.entity.CompanyTeam;
 import com.jobmanager.job_manager.entity.Employee;
+import com.jobmanager.job_manager.entity.UserForm;
 import com.jobmanager.job_manager.repository.CompanyTeamRepository;
 import com.jobmanager.job_manager.repository.EmployeeRepository;
+import com.jobmanager.job_manager.repository.UserFormRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -19,6 +22,7 @@ public class CompanyEmployeeQueryService {
 
     private final EmployeeRepository employeeRepository;
     private final CompanyTeamRepository teamRepository;
+    private final UserFormRepository userFormRepository;
 
     public List<CompanyEmployeeResponse> getMyCompanyEmployees(Long companyId) {
 
@@ -32,13 +36,31 @@ public class CompanyEmployeeQueryService {
                         CompanyTeam::getName
                 ));
 
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+
         return employees.stream()
-                .map(e -> new CompanyEmployeeResponse(
-                        e.getEmployeeId(),
-                        e.getTeamId(),
-                        e.getTeamId() != null ? teamMap.get(e.getTeamId()) : null,
-                        e.getJoinedAt().toString()
-                ))
+                .map(e -> {
+
+                    Long employeeId = e.getEmployeeId();
+
+                    // 직원 이름 조회 (user_form)
+                    String name = userFormRepository.findById(employeeId)
+                            .map(UserForm::getName)
+                            .orElse(null); // 온보딩 안 된 직원 대비
+
+                    Long teamId = e.getTeamId();
+                    String teamName = teamId != null ? teamMap.get(teamId) : null;
+
+                    return new CompanyEmployeeResponse(
+                            employeeId,                           // employeeAccountId
+                            name,                                 // name
+                            teamId,                               // teamId
+                            teamName,                             // teamName
+                            e.getJoinedAt() != null               // joinedAt
+                                    ? e.getJoinedAt().format(formatter)
+                                    : null
+                    );
+                })
                 .toList();
     }
 
