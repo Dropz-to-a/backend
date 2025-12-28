@@ -68,7 +68,7 @@ public class UserProfileService {
         }
 
         if (req.getLicenses() != null) {
-            form.setLicenses(toJson(req.getLicenses())); // 그대로 사용 가능
+            form.setLicenses(toJson(req.getLicenses()));
         }
 
         if (req.getForeignLangs() != null) {
@@ -116,10 +116,7 @@ public class UserProfileService {
                 && req.getMotivation() == null;
     }
 
-    /**
-     * - List<String> 전용 → 모든 List<T> 대응
-     */
-    private String toJson(List<?> list) {
+    private String toJson(List<String> list) {
         try {
             return objectMapper.writeValueAsString(list);
         } catch (Exception e) {

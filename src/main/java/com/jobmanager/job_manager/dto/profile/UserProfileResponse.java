@@ -23,7 +23,7 @@ public class UserProfileResponse {
     private String zonecode;
 
     private List<String> skills;
-    private List<LicenseDto> licenses;    // 변경
+    private List<String> licenses;
     private List<String> foreignLangs;
 
     /** 경력 목록 */
@@ -46,9 +46,9 @@ public class UserProfileResponse {
                 .address(f.getAddress())
                 .detailAddress(f.getDetailAddress())
                 .zonecode(f.getZonecode())
-                .skills(readStringList(f.getSkills()))
-                .licenses(readLicenseList(f.getLicenses()))   // 변경
-                .foreignLangs(readStringList(f.getForeignLangs()))
+                .skills(readList(f.getSkills()))
+                .licenses(readList(f.getLicenses()))
+                .foreignLangs(readList(f.getForeignLangs()))
                 .activities(
                         activities.stream()
                                 .map(UserActivityResponse::from)
@@ -58,21 +58,10 @@ public class UserProfileResponse {
                 .build();
     }
 
-    /** 기존 String 리스트용 (skills, foreignLangs) */
-    private static List<String> readStringList(String json) {
+    private static List<String> readList(String json) {
         if (json == null || json.isBlank()) return List.of();
         try {
             return om.readValue(json, new TypeReference<List<String>>() {});
-        } catch (Exception e) {
-            return List.of();
-        }
-    }
-
-    /** 자격증 전용 */
-    private static List<LicenseDto> readLicenseList(String json) {
-        if (json == null || json.isBlank()) return List.of();
-        try {
-            return om.readValue(json, new TypeReference<List<LicenseDto>>() {});
         } catch (Exception e) {
             return List.of();
         }
