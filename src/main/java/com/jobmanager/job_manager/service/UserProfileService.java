@@ -1,8 +1,6 @@
 package com.jobmanager.job_manager.service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jobmanager.job_manager.dto.profile.UserActivityResponse;
 import com.jobmanager.job_manager.dto.profile.UserProfileResponse;
 import com.jobmanager.job_manager.dto.profile.UserProfileUpdateRequest;
 import com.jobmanager.job_manager.entity.UserActivity;
@@ -70,7 +68,7 @@ public class UserProfileService {
         }
 
         if (req.getLicenses() != null) {
-            form.setLicenses(toJson(req.getLicenses()));
+            form.setLicenses(toJson(req.getLicenses())); // 그대로 사용 가능
         }
 
         if (req.getForeignLangs() != null) {
@@ -118,7 +116,10 @@ public class UserProfileService {
                 && req.getMotivation() == null;
     }
 
-    private String toJson(List<String> list) {
+    /**
+     * - List<String> 전용 → 모든 List<T> 대응
+     */
+    private String toJson(List<?> list) {
         try {
             return objectMapper.writeValueAsString(list);
         } catch (Exception e) {
