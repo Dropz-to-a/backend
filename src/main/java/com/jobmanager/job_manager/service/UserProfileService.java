@@ -1,6 +1,8 @@
 package com.jobmanager.job_manager.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jobmanager.job_manager.dto.profile.UserActivityResponse;
 import com.jobmanager.job_manager.dto.profile.UserProfileResponse;
 import com.jobmanager.job_manager.dto.profile.UserProfileUpdateRequest;
 import com.jobmanager.job_manager.entity.UserActivity;
