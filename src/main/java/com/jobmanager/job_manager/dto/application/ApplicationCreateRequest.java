@@ -169,6 +169,24 @@ public class ApplicationCreateRequest {
     private String familyAge4;
     private String familyJob4;
 
+    // ===== 자격증 1 =====
+    private String licenseType1;
+    private String licenseLevel1;
+    private String licenseDate1;
+    private String licenseIssuer1;
+
+    // ===== 자격증 2 =====
+    private String licenseType2;
+    private String licenseLevel2;
+    private String licenseDate2;
+    private String licenseIssuer2;
+
+    // ===== 자격증 3 =====
+    private String licenseType3;
+    private String licenseLevel3;
+    private String licenseDate3;
+    private String licenseIssuer3;
+
     // ===== 취미 / 특기 =====
     private String hobby;
     private String specialty;

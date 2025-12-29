@@ -104,6 +104,24 @@ public class ApplicationService {
                 .foreignLangScore2(req.getForeignLangScore2())
 
                 // =====================
+                // 자격증
+                // =====================
+                .licenseType1(req.getLicenseType1())
+                .licenseLevel1(req.getLicenseLevel1())
+                .licenseDate1(parseDate(req.getLicenseDate1()))
+                .licenseIssuer1(req.getLicenseIssuer1())
+
+                .licenseType2(req.getLicenseType2())
+                .licenseLevel2(req.getLicenseLevel2())
+                .licenseDate2(parseDate(req.getLicenseDate2()))
+                .licenseIssuer2(req.getLicenseIssuer2())
+
+                .licenseType3(req.getLicenseType3())
+                .licenseLevel3(req.getLicenseLevel3())
+                .licenseDate3(parseDate(req.getLicenseDate3()))
+                .licenseIssuer3(req.getLicenseIssuer3())
+
+                // =====================
                 // 대외활동
                 // =====================
                 .activities(req.getActivities())

@@ -193,6 +193,43 @@ public class Application {
     @Column(name = "family_job_4")
     private String familyJob4;
 
+    // ===== 자격증 (최대 3개) =====
+    @Column(name = "license_type_1")
+    private String licenseType1;
+
+    @Column(name = "license_level_1")
+    private String licenseLevel1;
+
+    @Column(name = "license_date_1")
+    private LocalDate licenseDate1;
+
+    @Column(name = "license_issuer_1")
+    private String licenseIssuer1;
+
+    @Column(name = "license_type_2")
+    private String licenseType2;
+
+    @Column(name = "license_level_2")
+    private String licenseLevel2;
+
+    @Column(name = "license_date_2")
+    private LocalDate licenseDate2;
+
+    @Column(name = "license_issuer_2")
+    private String licenseIssuer2;
+
+    @Column(name = "license_type_3")
+    private String licenseType3;
+
+    @Column(name = "license_level_3")
+    private String licenseLevel3;
+
+    @Column(name = "license_date_3")
+    private LocalDate licenseDate3;
+
+    @Column(name = "license_issuer_3")
+    private String licenseIssuer3;
+
     // ===== 취미 / 특기 =====
     @Column(name = "hobby")
     private String hobby;

@@ -95,6 +95,22 @@ public class ApplicationDetailResponse {
     private String familyAge4;
     private String familyJob4;
 
+    // ===== 자격증 =====
+    private String licenseType1;
+    private String licenseLevel1;
+    private LocalDate licenseDate1;
+    private String licenseIssuer1;
+
+    private String licenseType2;
+    private String licenseLevel2;
+    private LocalDate licenseDate2;
+    private String licenseIssuer2;
+
+    private String licenseType3;
+    private String licenseLevel3;
+    private LocalDate licenseDate3;
+    private String licenseIssuer3;
+
     // ===== 취미 / 특기 =====
     private String hobby;
     private String specialty;
@@ -177,6 +193,21 @@ public class ApplicationDetailResponse {
                 .familyName4(app.getFamilyName4())
                 .familyAge4(app.getFamilyAge4())
                 .familyJob4(app.getFamilyJob4())
+
+                .licenseType1(app.getLicenseType1())
+                .licenseLevel1(app.getLicenseLevel1())
+                .licenseDate1(app.getLicenseDate1())
+                .licenseIssuer1(app.getLicenseIssuer1())
+
+                .licenseType2(app.getLicenseType2())
+                .licenseLevel2(app.getLicenseLevel2())
+                .licenseDate2(app.getLicenseDate2())
+                .licenseIssuer2(app.getLicenseIssuer2())
+
+                .licenseType3(app.getLicenseType3())
+                .licenseLevel3(app.getLicenseLevel3())
+                .licenseDate3(app.getLicenseDate3())
+                .licenseIssuer3(app.getLicenseIssuer3())
 
                 .hobby(app.getHobby())
                 .specialty(app.getSpecialty())
