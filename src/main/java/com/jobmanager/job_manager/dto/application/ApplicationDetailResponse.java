@@ -16,43 +16,48 @@ public class ApplicationDetailResponse {
     private Long postingId;
     private Long writerId;
 
+    // =====================
     // 기본 정보
+    // =====================
     private String name;
     private String email;
     private String phone;
     private String address;
 
-    // 학력
-    private String educationSchool;
-    private String educationMajor;
-    private String educationDegree;
-    private LocalDate educationStartDate;
-    private LocalDate educationEndDate;
-    private boolean educationGraduated;
-
+    // =====================
     // 대외활동
+    // =====================
     private String activities;
 
+    // =====================
     // 자기소개
+    // =====================
     private String introduction;
     private String motivation;
     private String personality;
     private String futureGoal;
 
-    // ===== 신체 =====
-    private String height;
-    private String weight;
+    // =====================
+    // 신체
+    // =====================
+    private Integer height;
+    private Integer weight;
     private String blood;
 
-    // ===== 병역 =====
+    // =====================
+    // 병역
+    // =====================
     private String militaryStatus;
     private String militaryBranch;
     private String militaryType;
     private String militaryRank;
-    private String militaryPeriod;
+    private LocalDate militaryStartDate;
+    private LocalDate militaryEndDate;
     private String militaryExemptReason;
 
-    // ===== 수상 내역 =====
+    // =====================
+    // 수상 내역
+    // =====================
     private String awardName1;
     private LocalDate awardDate1;
     private String awardIssuer1;
@@ -65,7 +70,9 @@ public class ApplicationDetailResponse {
     private LocalDate awardDate3;
     private String awardIssuer3;
 
-    // ===== 외국어 활용 능력 =====
+    // =====================
+    // 외국어
+    // =====================
     private String foreignLangAbility1;
     private String foreignLangTest1;
     private String foreignLangScore1;
@@ -74,7 +81,9 @@ public class ApplicationDetailResponse {
     private String foreignLangTest2;
     private String foreignLangScore2;
 
-    // ===== 가족 =====
+    // =====================
+    // 가족
+    // =====================
     private String familyRelation1;
     private String familyName1;
     private String familyAge1;
@@ -95,7 +104,9 @@ public class ApplicationDetailResponse {
     private String familyAge4;
     private String familyJob4;
 
-    // ===== 자격증 =====
+    // =====================
+    // 자격증
+    // =====================
     private String licenseType1;
     private String licenseLevel1;
     private LocalDate licenseDate1;
@@ -111,9 +122,30 @@ public class ApplicationDetailResponse {
     private LocalDate licenseDate3;
     private String licenseIssuer3;
 
-    // ===== 취미 / 특기 =====
+    private String middleSchoolName;
+    private LocalDate middleSchoolStartDate;
+    private LocalDate middleSchoolEndDate;
+    private boolean middleSchoolGraduated;
+
+    private String highSchoolName;
+    private String highSchoolMajor;
+    private LocalDate highSchoolStartDate;
+    private LocalDate highSchoolEndDate;
+    private boolean highSchoolGraduated;
+
+    private String universityName;
+    private String universityMajor;
+    private LocalDate universityStartDate;
+    private LocalDate universityEndDate;
+    private boolean universityGraduated;
+
+    // =====================
+    // 취미 / 특기
+    // =====================
     private String hobby;
     private String specialty;
+
+    private String portfolioUrl;
 
     private ApplicationStatus status;
     private LocalDateTime appliedAt;
@@ -124,36 +156,74 @@ public class ApplicationDetailResponse {
                 .postingId(app.getPostingId())
                 .writerId(app.getWriterId())
 
+                // =====================
+                // 기본 정보
+                // =====================
                 .name(app.getName())
                 .email(app.getEmail())
                 .phone(app.getPhone())
                 .address(app.getAddress())
 
-                .educationSchool(app.getEducationSchool())
-                .educationMajor(app.getEducationMajor())
-                .educationDegree(app.getEducationDegree())
-                .educationStartDate(app.getEducationStartDate())
-                .educationEndDate(app.getEducationEndDate())
-                .educationGraduated(app.isEducationGraduated())
+                // =====================
+                // 학력 - 중학교
+                // =====================
+                .middleSchoolName(app.getMiddleSchoolName())
+                .middleSchoolStartDate(app.getMiddleSchoolStartDate())
+                .middleSchoolEndDate(app.getMiddleSchoolEndDate())
+                .middleSchoolGraduated(app.getMiddleSchoolGraduated())
 
+                // =====================
+                // 학력 - 고등학교
+                // =====================
+                .highSchoolName(app.getHighSchoolName())
+                .highSchoolMajor(app.getHighSchoolMajor())
+                .highSchoolStartDate(app.getHighSchoolStartDate())
+                .highSchoolEndDate(app.getHighSchoolEndDate())
+                .highSchoolGraduated(app.getHighSchoolGraduated())
+
+                // =====================
+                // 학력 - 대학교
+                // =====================
+                .universityName(app.getUniversityName())
+                .universityMajor(app.getUniversityMajor())
+                .universityStartDate(app.getUniversityStartDate())
+                .universityEndDate(app.getUniversityEndDate())
+                .universityGraduated(app.getUniversityGraduated())
+
+                // =====================
+                // 대외활동
+                // =====================
                 .activities(app.getActivities())
 
+                // =====================
+                // 자기소개
+                // =====================
                 .introduction(app.getIntroduction())
                 .motivation(app.getMotivation())
                 .personality(app.getPersonality())
                 .futureGoal(app.getFutureGoal())
 
+                // =====================
+                // 신체
+                // =====================
                 .height(app.getHeight())
                 .weight(app.getWeight())
                 .blood(app.getBlood())
 
+                // =====================
+                // 병역
+                // =====================
                 .militaryStatus(app.getMilitaryStatus())
                 .militaryBranch(app.getMilitaryBranch())
                 .militaryType(app.getMilitaryType())
                 .militaryRank(app.getMilitaryRank())
-                .militaryPeriod(app.getMilitaryPeriod())
+                .militaryStartDate(app.getMilitaryStartDate())
+                .militaryEndDate(app.getMilitaryEndDate())
                 .militaryExemptReason(app.getMilitaryExemptReason())
 
+                // =====================
+                // 수상 내역
+                // =====================
                 .awardName1(app.getAwardName1())
                 .awardDate1(app.getAwardDate1())
                 .awardIssuer1(app.getAwardIssuer1())
@@ -166,6 +236,9 @@ public class ApplicationDetailResponse {
                 .awardDate3(app.getAwardDate3())
                 .awardIssuer3(app.getAwardIssuer3())
 
+                // =====================
+                // 외국어
+                // =====================
                 .foreignLangAbility1(app.getForeignLangAbility1())
                 .foreignLangTest1(app.getForeignLangTest1())
                 .foreignLangScore1(app.getForeignLangScore1())
@@ -174,6 +247,9 @@ public class ApplicationDetailResponse {
                 .foreignLangTest2(app.getForeignLangTest2())
                 .foreignLangScore2(app.getForeignLangScore2())
 
+                // =====================
+                // 가족
+                // =====================
                 .familyRelation1(app.getFamilyRelation1())
                 .familyName1(app.getFamilyName1())
                 .familyAge1(app.getFamilyAge1())
@@ -194,6 +270,9 @@ public class ApplicationDetailResponse {
                 .familyAge4(app.getFamilyAge4())
                 .familyJob4(app.getFamilyJob4())
 
+                // =====================
+                // 자격증
+                // =====================
                 .licenseType1(app.getLicenseType1())
                 .licenseLevel1(app.getLicenseLevel1())
                 .licenseDate1(app.getLicenseDate1())
@@ -209,8 +288,12 @@ public class ApplicationDetailResponse {
                 .licenseDate3(app.getLicenseDate3())
                 .licenseIssuer3(app.getLicenseIssuer3())
 
+                // =====================
+                // 기타
+                // =====================
                 .hobby(app.getHobby())
                 .specialty(app.getSpecialty())
+                .portfolioUrl(app.getPortfolioUrl())
 
                 .status(app.getStatus())
                 .appliedAt(app.getCreatedAt())

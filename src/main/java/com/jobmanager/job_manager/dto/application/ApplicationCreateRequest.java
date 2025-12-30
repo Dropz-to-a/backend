@@ -32,33 +32,6 @@ public class ApplicationCreateRequest {
     private String profileImageUrl;
 
     // =====================
-    // 학력
-    // =====================
-    @Schema(example = "서울소프트웨어고등학교")
-    private String educationSchool;
-
-    @Schema(example = "소프트웨어개발과")
-    private String educationMajor;
-
-    @Schema(
-            description = "학위",
-            example = "HIGH_SCHOOL",
-            allowableValues = {
-                    "HIGH_SCHOOL", "ASSOCIATE", "BACHELOR", "MASTER", "DOCTOR"
-            }
-    )
-    private String educationDegree;
-
-    @Schema(example = "2023-03-02")
-    private String educationStartDate;
-
-    @Schema(example = "2026-02-28")
-    private String educationEndDate;
-
-    @Schema(example = "false")
-    private boolean educationGraduated;
-
-    // =====================
     // 대외활동
     // =====================
     @Schema(example = "교내 프로그래밍 동아리 활동")
@@ -80,19 +53,19 @@ public class ApplicationCreateRequest {
     private String futureGoal;
 
     // =====================
-    // 신체
+    // 신체 (숫자형)
     // =====================
     @Schema(example = "175")
-    private String height;
+    private Integer height;
 
     @Schema(example = "68")
-    private String weight;
+    private Integer weight;
 
-    @Schema(example = "O")
+    @Schema(example = "A")
     private String blood;
 
     // =====================
-    // 병역
+    // 병역 (기간 분리)
     // =====================
     @Schema(example = "군필")
     private String militaryStatus;
@@ -106,8 +79,11 @@ public class ApplicationCreateRequest {
     @Schema(example = "병장")
     private String militaryRank;
 
-    @Schema(example = "2021.03 ~ 2023.02")
-    private String militaryPeriod;
+    @Schema(example = "2021-03-01")
+    private String militaryStartDate; // yyyy-MM-dd
+
+    @Schema(example = "2023-02-28")
+    private String militaryEndDate;   // yyyy-MM-dd
 
     @Schema(example = "해당 없음")
     private String militaryExemptReason;
@@ -115,13 +91,8 @@ public class ApplicationCreateRequest {
     // =====================
     // 수상 내역
     // =====================
-    @Schema(example = "전국 SW 경진대회 대상")
     private String awardName1;
-
-    @Schema(example = "2024-11-10")
     private String awardDate1;
-
-    @Schema(example = "과학기술정보통신부")
     private String awardIssuer1;
 
     private String awardName2;
@@ -135,20 +106,17 @@ public class ApplicationCreateRequest {
     // =====================
     // 외국어
     // =====================
-    @Schema(example = "비즈니스 회화")
     private String foreignLangAbility1;
-
-    @Schema(example = "TOEIC")
     private String foreignLangTest1;
-
-    @Schema(example = "850")
     private String foreignLangScore1;
 
     private String foreignLangAbility2;
     private String foreignLangTest2;
     private String foreignLangScore2;
 
-    // ===== 가족 (최대 4명) =====
+    // =====================
+    // 가족 (최대 4명)
+    // =====================
     private String familyRelation1;
     private String familyName1;
     private String familyAge1;
@@ -169,25 +137,53 @@ public class ApplicationCreateRequest {
     private String familyAge4;
     private String familyJob4;
 
-    // ===== 자격증 1 =====
+    // =====================
+    // 자격증
+    // =====================
     private String licenseType1;
     private String licenseLevel1;
     private String licenseDate1;
     private String licenseIssuer1;
 
-    // ===== 자격증 2 =====
     private String licenseType2;
     private String licenseLevel2;
     private String licenseDate2;
     private String licenseIssuer2;
 
-    // ===== 자격증 3 =====
     private String licenseType3;
     private String licenseLevel3;
     private String licenseDate3;
     private String licenseIssuer3;
 
-    // ===== 취미 / 특기 =====
+    // =====================
+    // 학력 - 중학교
+    // =====================
+    private String middleSchoolName;
+    private String middleSchoolStartDate;
+    private String middleSchoolEndDate;
+    private boolean middleSchoolGraduated;
+
+    // =====================
+    // 학력 - 고등학교
+    // =====================
+    private String highSchoolName;
+    private String highSchoolMajor;
+    private String highSchoolStartDate;
+    private String highSchoolEndDate;
+    private boolean highSchoolGraduated;
+
+    // =====================
+    // 학력 - 대학교
+    // =====================
+    private String universityName;
+    private String universityMajor;
+    private String universityStartDate;
+    private String universityEndDate;
+    private boolean universityGraduated;
+
+    // =====================
+    // 취미 / 특기
+    // =====================
     private String hobby;
     private String specialty;
 

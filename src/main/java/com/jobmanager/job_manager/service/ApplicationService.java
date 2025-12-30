@@ -51,14 +51,30 @@ public class ApplicationService {
                 .profileImageUrl(req.getProfileImageUrl())
 
                 // =====================
-                // 학력
+                // 학력 - 중학교
                 // =====================
-                .educationSchool(req.getEducationSchool())
-                .educationMajor(req.getEducationMajor())
-                .educationDegree(req.getEducationDegree())
-                .educationStartDate(parseDate(req.getEducationStartDate()))
-                .educationEndDate(parseDate(req.getEducationEndDate()))
-                .educationGraduated(req.isEducationGraduated())
+                .middleSchoolName(req.getMiddleSchoolName())
+                .middleSchoolStartDate(parseDate(req.getMiddleSchoolStartDate()))
+                .middleSchoolEndDate(parseDate(req.getMiddleSchoolEndDate()))
+                .middleSchoolGraduated(req.isMiddleSchoolGraduated())
+
+                // =====================
+                // 학력 - 고등학교
+                // =====================
+                .highSchoolName(req.getHighSchoolName())
+                .highSchoolMajor(req.getHighSchoolMajor())
+                .highSchoolStartDate(parseDate(req.getHighSchoolStartDate()))
+                .highSchoolEndDate(parseDate(req.getHighSchoolEndDate()))
+                .highSchoolGraduated(req.isHighSchoolGraduated())
+
+                // =====================
+                // 학력 - 대학교
+                // =====================
+                .universityName(req.getUniversityName())
+                .universityMajor(req.getUniversityMajor())
+                .universityStartDate(parseDate(req.getUniversityStartDate()))
+                .universityEndDate(parseDate(req.getUniversityEndDate()))
+                .universityGraduated(req.isUniversityGraduated())
 
                 // =====================
                 // 신체
@@ -74,7 +90,8 @@ public class ApplicationService {
                 .militaryBranch(req.getMilitaryBranch())
                 .militaryType(req.getMilitaryType())
                 .militaryRank(req.getMilitaryRank())
-                .militaryPeriod(req.getMilitaryPeriod())
+                .militaryStartDate(parseDate(req.getMilitaryStartDate()))
+                .militaryEndDate(parseDate(req.getMilitaryEndDate()))
                 .militaryExemptReason(req.getMilitaryExemptReason())
 
                 // =====================

@@ -10,7 +10,8 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "applications")
-@Getter @Setter
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -26,7 +27,9 @@ public class Application {
     @Column(name = "writer_id", nullable = false)
     private Long writerId;
 
+    // =====================
     // 기본 정보
+    // =====================
     private String name;
     private LocalDate birth;
     private String email;
@@ -36,46 +39,35 @@ public class Application {
     @Column(name = "profile_image_url")
     private String profileImageUrl;
 
-    // 학력
-    @Column(name = "education_school")
-    private String educationSchool;
-
-    @Column(name = "education_major")
-    private String educationMajor;
-
-    @Column(name = "education_degree")
-    private String educationDegree;
-
-    @Column(name = "education_start_date")
-    private LocalDate educationStartDate;
-
-    @Column(name = "education_end_date")
-    private LocalDate educationEndDate;
-
-    @Column(name = "education_graduated")
-    private boolean educationGraduated;
-
+    // =====================
     // 대외활동
+    // =====================
     @Lob
     private String activities;
 
+    // =====================
     // 자기소개
+    // =====================
     @Lob private String introduction;
     @Lob private String motivation;
     @Lob private String personality;
     @Lob private String futureGoal;
 
-    // ===== 신체 =====
+    // =====================
+    // 신체 (숫자형)
+    // =====================
     @Column(name = "height")
-    private String height;
+    private Integer height;
 
     @Column(name = "weight")
-    private String weight;
+    private Integer weight;
 
     @Column(name = "blood")
     private String blood;
 
-    // ===== 병역 =====
+    // =====================
+    // 병역 (기간 분리)
+    // =====================
     @Column(name = "military_status")
     private String militaryStatus;
 
@@ -88,13 +80,18 @@ public class Application {
     @Column(name = "military_rank")
     private String militaryRank;
 
-    @Column(name = "military_period")
-    private String militaryPeriod;
+    @Column(name = "military_start_date")
+    private LocalDate militaryStartDate;
+
+    @Column(name = "military_end_date")
+    private LocalDate militaryEndDate;
 
     @Column(name = "military_exempt_reason")
     private String militaryExemptReason;
 
-    // ===== 수상 내역 (최대 3개) =====
+    // =====================
+// 수상 내역
+// =====================
     @Column(name = "award_name_1")
     private String awardName1;
 
@@ -122,7 +119,9 @@ public class Application {
     @Column(name = "award_issuer_3")
     private String awardIssuer3;
 
-    // ===== 외국어 활용 능력 (최대 2개) =====
+    // =====================
+    // 외국어
+    // =====================
     @Column(name = "foreign_lang_ability_1")
     private String foreignLangAbility1;
 
@@ -141,7 +140,9 @@ public class Application {
     @Column(name = "foreign_lang_score_2")
     private String foreignLangScore2;
 
-    // ===== 가족 1 =====
+    // =====================
+    // 가족
+    // =====================
     @Column(name = "family_relation_1")
     private String familyRelation1;
 
@@ -154,7 +155,6 @@ public class Application {
     @Column(name = "family_job_1")
     private String familyJob1;
 
-    // ===== 가족 2 =====
     @Column(name = "family_relation_2")
     private String familyRelation2;
 
@@ -167,7 +167,6 @@ public class Application {
     @Column(name = "family_job_2")
     private String familyJob2;
 
-    // ===== 가족 3 =====
     @Column(name = "family_relation_3")
     private String familyRelation3;
 
@@ -180,7 +179,6 @@ public class Application {
     @Column(name = "family_job_3")
     private String familyJob3;
 
-    // ===== 가족 4 =====
     @Column(name = "family_relation_4")
     private String familyRelation4;
 
@@ -193,7 +191,9 @@ public class Application {
     @Column(name = "family_job_4")
     private String familyJob4;
 
-    // ===== 자격증 (최대 3개) =====
+    // =====================
+    // 자격증
+    // =====================
     @Column(name = "license_type_1")
     private String licenseType1;
 
@@ -230,14 +230,63 @@ public class Application {
     @Column(name = "license_issuer_3")
     private String licenseIssuer3;
 
-    // ===== 취미 / 특기 =====
+    // =====================
+    // 취미 / 특기
+    // =====================
     @Column(name = "hobby")
     private String hobby;
 
     @Column(name = "specialty")
     private String specialty;
 
+    // ===== 중학교 =====
+    @Column(name = "middle_school_name")
+    private String middleSchoolName;
+
+    @Column(name = "middle_school_start_date")
+    private LocalDate middleSchoolStartDate;
+
+    @Column(name = "middle_school_end_date")
+    private LocalDate middleSchoolEndDate;
+
+    @Column(name = "middle_school_graduated")
+    private Boolean middleSchoolGraduated;
+
+    // ===== 고등학교 =====
+    @Column(name = "high_school_name")
+    private String highSchoolName;
+
+    @Column(name = "high_school_major")
+    private String highSchoolMajor;
+
+    @Column(name = "high_school_start_date")
+    private LocalDate highSchoolStartDate;
+
+    @Column(name = "high_school_end_date")
+    private LocalDate highSchoolEndDate;
+
+    @Column(name = "high_school_graduated")
+    private Boolean highSchoolGraduated;
+
+    // ===== 대학교 =====
+    @Column(name = "university_name")
+    private String universityName;
+
+    @Column(name = "university_major")
+    private String universityMajor;
+
+    @Column(name = "university_start_date")
+    private LocalDate universityStartDate;
+
+    @Column(name = "university_end_date")
+    private LocalDate universityEndDate;
+
+    @Column(name = "university_graduated")
+    private Boolean universityGraduated;
+
+    // =====================
     // 기타
+    // =====================
     private String portfolioUrl;
 
     @Enumerated(EnumType.STRING)
