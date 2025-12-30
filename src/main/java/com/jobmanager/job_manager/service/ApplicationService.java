@@ -271,6 +271,21 @@ public class ApplicationService {
     }
 
     // =====================
+    // USER - 내 지원서 상세 조회
+    // =====================
+        @Transactional(readOnly = true)
+        public ApplicationDetailResponse getMyApplicationDetail(
+                Long applicationId,
+                Long writerId
+        ) {
+            Application app = applicationRepository
+                    .findByIdAndWriterId(applicationId, writerId)
+                    .orElseThrow(() -> new IllegalArgumentException("지원서를 찾을 수 없습니다."));
+
+            return ApplicationDetailResponse.from(app);
+        }
+
+    // =====================
     // 공통 날짜 파서
     // =====================
     private LocalDate parseDate(String value) {

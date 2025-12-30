@@ -1,6 +1,7 @@
 package com.jobmanager.job_manager.controller;
 
 import com.jobmanager.job_manager.dto.application.ApplicationCreateRequest;
+import com.jobmanager.job_manager.dto.application.ApplicationDetailResponse;
 import com.jobmanager.job_manager.dto.application.MyApplicationResponse;
 import com.jobmanager.job_manager.global.jwt.SimpleUserPrincipal;
 import com.jobmanager.job_manager.service.ApplicationService;
@@ -64,6 +65,30 @@ public class ApplicationUserController {
     ) {
         return ResponseEntity.ok(
                 applicationService.getMyApplications(principal.getAccountId())
+        );
+    }
+
+    /**
+     * 3️⃣ 내 지원서 상세 조회
+     */
+    @Operation(
+            summary = "내 지원서 상세 조회",
+            description = """
+                사용자가 본인이 작성한 지원서 1건을 상세 조회합니다.
+                
+                - 본인 지원서만 조회 가능합니다.
+                """
+    )
+    @GetMapping("/{applicationId}")
+    public ResponseEntity<ApplicationDetailResponse> myApplicationDetail(
+            @AuthenticationPrincipal SimpleUserPrincipal principal,
+            @PathVariable Long applicationId
+    ) {
+        return ResponseEntity.ok(
+                applicationService.getMyApplicationDetail(
+                        applicationId,
+                        principal.getAccountId()
+                )
         );
     }
 }
