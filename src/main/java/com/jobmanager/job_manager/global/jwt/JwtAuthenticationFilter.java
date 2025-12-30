@@ -51,7 +51,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         claims.get("role", String.class),
                         claims.get("onboarded", Boolean.class),
                         claims.get("companyName", String.class),
-                        claims.get("businessNumber", String.class)
+                        claims.get("businessNumber", String.class),
+                        claims.get("employmentStatus", String.class) // 추가
                 );
 
                 UsernamePasswordAuthenticationToken auth =

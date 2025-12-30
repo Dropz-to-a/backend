@@ -19,7 +19,6 @@ public class JwtTokenProvider {
 
     //private static final long ACCESS_30_MIN = 1 * 60 * 1000L; // 테스트용 1분 처리
 
-
     public JwtTokenProvider(
             @Value("${jwt.secret}") String secretKey
     ) {
@@ -34,7 +33,8 @@ public class JwtTokenProvider {
             String role,
             boolean onboarded,
             String companyName,
-            String businessNumber
+            String businessNumber,
+            String employmentStatus // 추가
     ) {
         Date now = new Date();
         Date expiry = new Date(now.getTime() + ACCESS_30_MIN);
@@ -50,6 +50,11 @@ public class JwtTokenProvider {
 
         if (companyName != null) builder.claim("companyName", companyName);
         if (businessNumber != null) builder.claim("businessNumber", businessNumber);
+
+        // USER 토큰일 때만 실리게 됨 (null이면 안 들어감)
+        if (employmentStatus != null) {
+            builder.claim("employmentStatus", employmentStatus);
+        }
 
         return builder
                 .signWith(key, SignatureAlgorithm.HS256)
@@ -80,5 +85,10 @@ public class JwtTokenProvider {
 
     public String getRole(String token) {
         return parse(token).get("role", String.class);
+    }
+
+    // 선택: 필요하면 나중에 사용
+    public String getEmploymentStatus(String token) {
+        return parse(token).get("employmentStatus", String.class);
     }
 }

@@ -2,6 +2,7 @@ package com.jobmanager.job_manager.service;
 
 import com.jobmanager.job_manager.dto.auth.RegisterRequest;
 import com.jobmanager.job_manager.entity.*;
+import com.jobmanager.job_manager.entity.enums.EmploymentStatus;
 import com.jobmanager.job_manager.global.exception.errorcodes.AuthErrorCode;
 import com.jobmanager.job_manager.global.exception.exceptions.BusinessException;
 import com.jobmanager.job_manager.global.jwt.JwtTokenProvider;
@@ -91,6 +92,11 @@ public class AuthService {
                 .findTopRoleCodeByAccountId(account.getId())
                 .orElse("ROLE_USER");
 
+        String employmentStatus =
+                account.getAccountType() == Account.AccountType.USER
+                        ? account.getEmploymentStatus().name()
+                        : null;
+
         String accessToken = jwtTokenProvider.generateAccessToken(
                 account.getId(),
                 account.getUsername(),
@@ -98,7 +104,8 @@ public class AuthService {
                 roleCode,
                 account.isOnboarded(),
                 null,
-                null
+                null,
+                employmentStatus
         );
 
         String refreshRaw = UUID.randomUUID().toString().replace("-", "");
@@ -136,6 +143,11 @@ public class AuthService {
                 .findTopRoleCodeByAccountId(account.getId())
                 .orElse("ROLE_USER");
 
+        String employmentStatus =
+                account.getAccountType() == Account.AccountType.USER
+                        ? account.getEmploymentStatus().name()
+                        : null;
+
         return jwtTokenProvider.generateAccessToken(
                 account.getId(),
                 account.getUsername(),
@@ -143,7 +155,8 @@ public class AuthService {
                 roleCode,
                 account.isOnboarded(),
                 null,
-                null
+                null,
+                employmentStatus
         );
     }
 

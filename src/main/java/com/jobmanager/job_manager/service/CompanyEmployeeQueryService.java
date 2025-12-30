@@ -5,11 +5,15 @@ import com.jobmanager.job_manager.dto.company.CompanyTeamResponse;
 import com.jobmanager.job_manager.entity.CompanyTeam;
 import com.jobmanager.job_manager.entity.Employee;
 import com.jobmanager.job_manager.entity.UserForm;
+import com.jobmanager.job_manager.entity.Account;
+import com.jobmanager.job_manager.entity.enums.EmploymentStatus;
 import com.jobmanager.job_manager.repository.CompanyTeamRepository;
 import com.jobmanager.job_manager.repository.EmployeeRepository;
 import com.jobmanager.job_manager.repository.UserFormRepository;
+import com.jobmanager.job_manager.repository.AccountRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -23,6 +27,9 @@ public class CompanyEmployeeQueryService {
     private final EmployeeRepository employeeRepository;
     private final CompanyTeamRepository teamRepository;
     private final UserFormRepository userFormRepository;
+
+    // 기존 코드 유지 + 이미 추가돼 있던 레포지토리
+    private final AccountRepository accountRepository;
 
     public List<CompanyEmployeeResponse> getMyCompanyEmployees(Long companyId) {
 
@@ -73,5 +80,19 @@ public class CompanyEmployeeQueryService {
                         team.getDescription()
                 ))
                 .toList();
+    }
+
+    // 직원 등록 + 유저 재직 상태 변경
+    @Transactional
+    public void registerEmployee(Long companyId, Long employeeId) {
+
+        // new Employee(companyId, employeeId)
+        // 팩토리 메서드 사용 (에러 원인 해결)
+        employeeRepository.save(
+                Employee.create(companyId, employeeId)
+        );
+
+        Account user = accountRepository.findById(employeeId).get();
+        user.setEmploymentStatus(EmploymentStatus.EMPLOYED);
     }
 }

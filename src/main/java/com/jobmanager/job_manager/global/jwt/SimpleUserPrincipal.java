@@ -8,9 +8,10 @@ import lombok.Getter;
 public class SimpleUserPrincipal {
 
     private Long accountId;
-    private String accountType;     // USER / COMPANY / ADMIN
-    private String role;            // ROLE_*
-    private Boolean onboarded;      // 온보딩 여부
-    private String companyName;     // USER 전용
-    private String businessNumber;  // COMPANY 전용
+    private String accountType;      // USER / COMPANY / ADMIN
+    private String role;             // ROLE_*
+    private Boolean onboarded;       // 온보딩 여부
+    private String companyName;      // USER 전용
+    private String businessNumber;   // COMPANY 전용
+    private String employmentStatus; // USER 전용 (EMPLOYED / UNEMPLOYED)
 }

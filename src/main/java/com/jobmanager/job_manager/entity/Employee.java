@@ -33,4 +33,13 @@ public class Employee {
     /** 직원이 회사에 소속된 날짜 */
     @Column(name = "joined_at", nullable = false)
     private LocalDateTime joinedAt;
+
+    // 추가: 직원 등록용 팩토리 메서드
+    public static Employee create(Long companyId, Long employeeId) {
+        Employee employee = new Employee();
+        employee.setCompanyId(companyId);
+        employee.setEmployeeId(employeeId);
+        employee.setJoinedAt(LocalDateTime.now());
+        return employee;
+    }
 }

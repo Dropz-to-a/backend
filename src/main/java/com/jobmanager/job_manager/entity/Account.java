@@ -1,5 +1,6 @@
 package com.jobmanager.job_manager.entity;
 
+import com.jobmanager.job_manager.entity.enums.EmploymentStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -34,7 +35,12 @@ public class Account {
     private Status status;
 
     @Column(nullable = false)
-    private boolean onboarded; // ✅ 추가
+    private boolean onboarded; // 기존 필드
+
+    // 추가: 재직 상태
+    @Enumerated(EnumType.STRING)
+    @Column(name = "employment_status", nullable = false)
+    private EmploymentStatus employmentStatus;
 
     private LocalDateTime lastLoginAt;
     private LocalDateTime createdAt;
@@ -47,10 +53,15 @@ public class Account {
         this.onboarded = true;
     }
 
+    // 선택: 기본값 세팅 (기존 로직 유지 + 추가)
     @PrePersist
     public void prePersist() {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
+
+        if (this.employmentStatus == null) {
+            this.employmentStatus = EmploymentStatus.UNEMPLOYED;
+        }
     }
 
     @PreUpdate
