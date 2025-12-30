@@ -3,6 +3,7 @@ package com.jobmanager.job_manager.entity;
 import com.jobmanager.job_manager.entity.enums.EmploymentStatus;
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -37,7 +38,6 @@ public class Account {
     @Column(nullable = false)
     private Boolean onboarded;
 
-    // 추가: 재직 상태
     @Enumerated(EnumType.STRING)
     @Column(name = "employment_status", nullable = false)
     private EmploymentStatus employmentStatus;
@@ -46,18 +46,26 @@ public class Account {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public enum AccountType { USER, COMPANY, ADMIN }
-    public enum Status { ACTIVE, SUSPENDED, DELETED }
-
-    public void markOnboarded() {
-        this.onboarded = true;
+    public enum AccountType {
+        USER, COMPANY, ADMIN
     }
 
-    // 선택: 기본값 세팅 (기존 로직 유지 + 추가)
+    public enum Status {
+        ACTIVE, SUSPENDED, DELETED
+    }
+
+    public void markOnboarded() {
+        this.onboarded = Boolean.TRUE;
+    }
+
     @PrePersist
     public void prePersist() {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
+
+        if (this.onboarded == null) {
+            this.onboarded = Boolean.FALSE;
+        }
 
         if (this.employmentStatus == null) {
             this.employmentStatus = EmploymentStatus.UNEMPLOYED;
