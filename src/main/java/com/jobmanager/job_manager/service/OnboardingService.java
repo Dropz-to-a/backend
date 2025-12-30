@@ -46,8 +46,8 @@ public class OnboardingService {
             );
         }
 
-        // 이미 온보딩 완료된 계정 차단 (★)
-        if (account.isOnboarded()) {
+        // 이미 온보딩 완료된 계정 차단
+        if (Boolean.TRUE.equals(account.getOnboarded())) {
             throw new OnboardingException(
                     OnboardingErrorCode.USER_ALREADY_ONBOARDED
             );
@@ -111,7 +111,7 @@ public class OnboardingService {
         }
 
         // 이미 온보딩 완료된 계정 차단
-        if (account.isOnboarded()) {
+        if (Boolean.TRUE.equals(account.getOnboarded())) {
             throw new OnboardingException(
                     OnboardingErrorCode.COMPANY_ALREADY_ONBOARDED
             );

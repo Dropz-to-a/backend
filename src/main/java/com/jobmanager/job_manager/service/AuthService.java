@@ -102,7 +102,7 @@ public class AuthService {
                 account.getUsername(),
                 account.getAccountType().name(),
                 roleCode,
-                account.isOnboarded(),
+                account.getOnboarded(),
                 null,
                 null,
                 employmentStatus
@@ -153,7 +153,7 @@ public class AuthService {
                 account.getUsername(),
                 account.getAccountType().name(),
                 roleCode,
-                account.isOnboarded(),
+                account.getOnboarded(),
                 null,
                 null,
                 employmentStatus
