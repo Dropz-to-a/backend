@@ -1,4 +1,3 @@
-// src/main/java/com/jobmanager/job_manager/service/OnboardingService.java
 package com.jobmanager.job_manager.service;
 
 import com.jobmanager.job_manager.dto.bankonboarding.BankAccountResponse;
@@ -111,7 +110,7 @@ public class OnboardingService {
             );
         }
 
-        // 이미 온보딩 완료된 계정 차단 (★)
+        // 이미 온보딩 완료된 계정 차단
         if (account.isOnboarded()) {
             throw new OnboardingException(
                     OnboardingErrorCode.COMPANY_ALREADY_ONBOARDED

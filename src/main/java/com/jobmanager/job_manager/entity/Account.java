@@ -35,7 +35,7 @@ public class Account {
     private Status status;
 
     @Column(nullable = false)
-    private boolean onboarded; // 기존 필드
+    private Boolean onboarded;
 
     // 추가: 재직 상태
     @Enumerated(EnumType.STRING)
