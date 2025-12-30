@@ -98,7 +98,7 @@ public class AuthService {
                 .findTopRoleCodeByAccountId(account.getId())
                 .orElse("ROLE_USER");
 
-        boolean onboarded = isUserOnboarded(account);
+        boolean onboarded = isOnboarded(account);
 
         String accessToken = jwtTokenProvider.generateAccessToken(
                 account.getId(),
@@ -148,7 +148,7 @@ public class AuthService {
                 .findTopRoleCodeByAccountId(account.getId())
                 .orElse("ROLE_USER");
 
-        boolean onboarded = isUserOnboarded(account);
+        boolean onboarded = isOnboarded(account);
 
         return jwtTokenProvider.generateAccessToken(
                 account.getId(),
@@ -162,24 +162,29 @@ public class AuthService {
     }
 
     // ============================================================
-    // USER 온보딩 여부 판단 (수정된 부분)
+    // 온보딩 여부 판단 (핵심 수정)
     // ============================================================
-    private boolean isUserOnboarded(Account account) {
+    private boolean isOnboarded(Account account) {
 
-        // USER가 아니면 항상 true
-        if (account.getAccountType() != Account.AccountType.USER) {
-            return true;
-        }
+        return switch (account.getAccountType()) {
 
-        return userFormRepository.findById(account.getId())
-                .filter(f ->
-                        hasText(f.getName()) &&
-                                f.getBirth() != null &&
-                                hasText(f.getZonecode()) &&
-                                hasText(f.getAddress()) &&
-                                hasText(f.getDetailAddress())
-                )
-                .isPresent();
+            case USER ->
+                    userFormRepository.findById(account.getId())
+                            .filter(f ->
+                                    hasText(f.getName()) &&
+                                            f.getBirth() != null &&
+                                            hasText(f.getZonecode()) &&
+                                            hasText(f.getAddress()) &&
+                                            hasText(f.getDetailAddress())
+                            )
+                            .isPresent();
+
+            case COMPANY ->
+                    false; // 기본값 false (회사 온보딩 생기면 여기만 수정)
+
+            case ADMIN ->
+                    true;
+        };
     }
 
     private boolean hasText(String s) {
