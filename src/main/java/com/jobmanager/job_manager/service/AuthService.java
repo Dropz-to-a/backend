@@ -24,13 +24,9 @@ public class AuthService {
     private final RoleRepository roleRepository;
     private final AccountRoleRepository accountRoleRepository;
     private final RefreshTokenRepository refreshTokenRepository;
-    private final UserFormRepository userFormRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
 
-    // ============================================================
-    // 회원가입
-    // ============================================================
     @Transactional
     public void register(RegisterRequest req) {
 
@@ -77,9 +73,6 @@ public class AuthService {
         );
     }
 
-    // ============================================================
-    // 로그인 (Access + Refresh 발급)
-    // ============================================================
     @Transactional
     public LoginResult login(String id, String rawPassword) {
 
@@ -98,14 +91,12 @@ public class AuthService {
                 .findTopRoleCodeByAccountId(account.getId())
                 .orElse("ROLE_USER");
 
-        boolean onboarded = isOnboarded(account);
-
         String accessToken = jwtTokenProvider.generateAccessToken(
                 account.getId(),
                 account.getUsername(),
                 account.getAccountType().name(),
                 roleCode,
-                onboarded,
+                account.isOnboarded(),
                 null,
                 null
         );
@@ -125,9 +116,6 @@ public class AuthService {
         return new LoginResult(accessToken, refreshRaw);
     }
 
-    // ============================================================
-    // Access Token 재발급
-    // ============================================================
     @Transactional(readOnly = true)
     public String refresh(String refreshTokenRaw) {
 
@@ -148,47 +136,15 @@ public class AuthService {
                 .findTopRoleCodeByAccountId(account.getId())
                 .orElse("ROLE_USER");
 
-        boolean onboarded = isOnboarded(account);
-
         return jwtTokenProvider.generateAccessToken(
                 account.getId(),
                 account.getUsername(),
                 account.getAccountType().name(),
                 roleCode,
-                onboarded,
+                account.isOnboarded(),
                 null,
                 null
         );
-    }
-
-    // ============================================================
-    // 온보딩 여부 판단 (핵심 수정)
-    // ============================================================
-    private boolean isOnboarded(Account account) {
-
-        return switch (account.getAccountType()) {
-
-            case USER ->
-                    userFormRepository.findById(account.getId())
-                            .filter(f ->
-                                    hasText(f.getName()) &&
-                                            f.getBirth() != null &&
-                                            hasText(f.getZonecode()) &&
-                                            hasText(f.getAddress()) &&
-                                            hasText(f.getDetailAddress())
-                            )
-                            .isPresent();
-
-            case COMPANY ->
-                    false; // 기본값 false (회사 온보딩 생기면 여기만 수정)
-
-            case ADMIN ->
-                    true;
-        };
-    }
-
-    private boolean hasText(String s) {
-        return s != null && !s.isBlank();
     }
 
     private String defaultRole(String roleCode) {
@@ -215,8 +171,5 @@ public class AuthService {
         };
     }
 
-    // ============================================================
-    // 컨트롤러 반환용
-    // ============================================================
     public record LoginResult(String accessToken, String refreshToken) {}
 }

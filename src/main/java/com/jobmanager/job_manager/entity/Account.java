@@ -33,12 +33,19 @@ public class Account {
     @Column(nullable = false)
     private Status status;
 
+    @Column(nullable = false)
+    private boolean onboarded; // ✅ 추가
+
     private LocalDateTime lastLoginAt;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
     public enum AccountType { USER, COMPANY, ADMIN }
     public enum Status { ACTIVE, SUSPENDED, DELETED }
+
+    public void markOnboarded() {
+        this.onboarded = true;
+    }
 
     @PrePersist
     public void prePersist() {

@@ -36,27 +36,30 @@ public class OnboardingService {
      */
     public UserOnboardingResponse onboardUser(Long accountId, UserOnboardingRequest req) {
 
-        // 1. 계정 존재 여부
         Account account = accountRepository.findById(accountId)
                 .orElseThrow(() ->
                         new OnboardingException(OnboardingErrorCode.ACCOUNT_NOT_FOUND)
                 );
 
-        // 2. 계정 타입 검증
         if (account.getAccountType() != Account.AccountType.USER) {
             throw new OnboardingException(
                     OnboardingErrorCode.COMPANY_CANNOT_ONBOARD_USER
             );
         }
 
-        // 3. 중복 온보딩 방지
+        // 이미 온보딩 완료된 계정 차단 (★)
+        if (account.isOnboarded()) {
+            throw new OnboardingException(
+                    OnboardingErrorCode.USER_ALREADY_ONBOARDED
+            );
+        }
+
         if (userFormRepository.existsById(accountId)) {
             throw new OnboardingException(
                     OnboardingErrorCode.USER_ALREADY_ONBOARDED
             );
         }
 
-        // 4. 생년월일 파싱
         LocalDate birth = null;
         if (req.getBirth() != null && !req.getBirth().isBlank()) {
             try {
@@ -68,14 +71,12 @@ public class OnboardingService {
             }
         }
 
-        // 5. 필수값 검증 (방어적)
         if (req.getRealName() == null || req.getRealName().isBlank()) {
             throw new OnboardingException(
                     OnboardingErrorCode.REQUIRED_FIELD_MISSING
             );
         }
 
-        // 6. 신규 UserForm 생성
         UserForm form = UserForm.builder()
                 .accountId(accountId)
                 .name(req.getRealName())
@@ -87,6 +88,10 @@ public class OnboardingService {
 
         userFormRepository.saveAndFlush(form);
 
+        // 온보딩 완료 처리
+        account.markOnboarded();
+        accountRepository.save(account);
+
         return UserOnboardingResponse.from(form);
     }
 
@@ -95,34 +100,36 @@ public class OnboardingService {
      */
     public CompanyOnboardingResponse onboardCompany(Long accountId, CompanyOnboardingRequest req) {
 
-        // 1. 계정 존재 여부
         Account account = accountRepository.findById(accountId)
                 .orElseThrow(() ->
                         new OnboardingException(OnboardingErrorCode.ACCOUNT_NOT_FOUND)
                 );
 
-        // 2. 계정 타입 검증
         if (account.getAccountType() != Account.AccountType.COMPANY) {
             throw new OnboardingException(
                     OnboardingErrorCode.USER_CANNOT_ONBOARD_COMPANY
             );
         }
 
-        // 3. 중복 온보딩 방지
+        // 이미 온보딩 완료된 계정 차단 (★)
+        if (account.isOnboarded()) {
+            throw new OnboardingException(
+                    OnboardingErrorCode.COMPANY_ALREADY_ONBOARDED
+            );
+        }
+
         if (companyRepository.existsById(accountId)) {
             throw new OnboardingException(
                     OnboardingErrorCode.COMPANY_ALREADY_ONBOARDED
             );
         }
 
-        // 4. 필수값 검증
         if (req.getCompanyName() == null || req.getCompanyName().isBlank()) {
             throw new OnboardingException(
                     OnboardingErrorCode.REQUIRED_FIELD_MISSING
             );
         }
 
-        // 5. 신규 Company 생성
         Company company = Company.builder()
                 .accountId(accountId)
                 .companyName(req.getCompanyName())
@@ -133,6 +140,10 @@ public class OnboardingService {
                 .build();
 
         companyRepository.saveAndFlush(company);
+
+        // 온보딩 완료 처리
+        account.markOnboarded();
+        accountRepository.save(account);
 
         return CompanyOnboardingResponse.from(company);
     }
@@ -145,7 +156,6 @@ public class OnboardingService {
             String role,
             BankAccountRequest req
     ) {
-        // USER인 경우 재직자 필수
         if ("ROLE_USER".equals(role)) {
             if (!employeeRepository.existsByEmployeeId(accountId)) {
                 throw new BankOnboardingException(
